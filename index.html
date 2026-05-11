@@ -573,6 +573,337 @@
   </div>
 </div>
 
+<!-- ── Modals: Customers ──────────────────────────────────── -->
+
+<!-- Modal: Add Customer -->
+<div id="modal-customer-add" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Add customer</span>
+      <button class="modal-close" onclick="closeModal('modal-customer-add')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <div class="field field-full">
+          <label>Customer name</label>
+          <input type="text" id="add-cust-name" placeholder="ชื่อ-นามสกุล">
+        </div>
+
+        <div class="field">
+          <label>Account no.</label>
+          <input type="text" id="add-cust-ac" placeholder="เช่น AC-00001">
+        </div>
+
+        <div class="field">
+          <label>Date of birth</label>
+          <input type="date" id="add-cust-bday">
+        </div>
+
+        <div class="field field-full">
+          <label>Address</label>
+          <textarea id="add-cust-addr" placeholder="ที่อยู่ลูกค้า"></textarea>
+        </div>
+
+      </div>
+      <div class="form-actions">
+        <button class="btn" onclick="closeModal('modal-customer-add')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitAddCustomer()">
+          <i class="ti ti-check" aria-hidden="true"></i> Save customer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Edit Customer -->
+<div id="modal-customer-edit" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Edit customer</span>
+      <button class="modal-close" onclick="closeModal('modal-customer-edit')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-cust-id">
+      <div class="form-grid">
+
+        <div class="field field-full">
+          <label>Customer name</label>
+          <input type="text" id="edit-cust-name" placeholder="ชื่อ-นามสกุล">
+        </div>
+
+        <div class="field">
+          <label>Account no.</label>
+          <input type="text" id="edit-cust-ac" placeholder="เช่น AC-00001">
+        </div>
+
+        <div class="field">
+          <label>Date of birth</label>
+          <input type="date" id="edit-cust-bday">
+        </div>
+
+        <div class="field field-full">
+          <label>Address</label>
+          <textarea id="edit-cust-addr" placeholder="ที่อยู่ลูกค้า"></textarea>
+        </div>
+
+      </div>
+      <div class="form-actions">
+        <button class="btn" onclick="closeModal('modal-customer-edit')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitEditCustomer()">
+          <i class="ti ti-check" aria-hidden="true"></i> Save changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Modals: Underwriting ───────────────────────────────── -->
+
+<!-- Modal: Review / Edit Underwriting -->
+<div id="modal-uw-review" class="modal-backdrop">
+  <div class="modal" style="width:620px">
+    <div class="modal-head">
+      <span class="modal-title">Underwriting Review</span>
+      <button class="modal-close" onclick="closeModal('modal-uw-review')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="uw-id">
+      <input type="hidden" id="uw-app-id">
+
+      <!-- ── Section: Credit Assessment ── -->
+      <div class="section-label" style="margin-bottom:12px">
+        <i class="ti ti-chart-bar" style="margin-right:4px"></i>Credit Assessment
+      </div>
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Credit Score <span style="color:var(--muted);font-size:10px">(300 – 850)</span></label>
+          <input type="number" id="uw-credit-score"
+            min="300" max="850" placeholder="เช่น 720">
+        </div>
+
+        <div class="field">
+          <label>Risk Rating</label>
+          <select id="uw-risk-rating">
+            <option value="">— เลือก —</option>
+            <option value="Low">Low</option>
+            <option value="Medium">Medium</option>
+            <option value="High">High</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>DTI Ratio <span style="color:var(--muted);font-size:10px">(%)</span></label>
+          <input type="number" id="uw-dti"
+            min="0" max="100" step="0.01" placeholder="เช่น 35.50">
+        </div>
+
+      </div>
+
+      <div class="divider" style="margin:16px 0"></div>
+
+      <!-- ── Section: Decision ── -->
+      <div class="section-label" style="margin-bottom:12px">
+        <i class="ti ti-gavel" style="margin-right:4px"></i>Decision
+      </div>
+      <div class="form-grid">
+
+        <div class="field field-full">
+          <label>Decision</label>
+          <select id="uw-decision" onchange="onUwDecisionChange()">
+            <option value="Pending">Pending</option>
+            <option value="Clear to Close">Clear to Close</option>
+            <option value="Conditional Approval">Conditional Approval</option>
+            <option value="Suspended">Suspended</option>
+            <option value="Denied">Denied</option>
+          </select>
+        </div>
+
+        <div class="field field-full" id="uw-conditions-wrap">
+          <label>
+            Conditions
+            <span id="uw-conditions-required"
+              style="color:var(--red);margin-left:2px">*</span>
+          </label>
+          <textarea id="uw-conditions"
+            placeholder="ระบุเงื่อนไขหรือเหตุผลประกอบการตัดสินใจ..."></textarea>
+        </div>
+
+      </div>
+
+      <div class="divider" style="margin:16px 0"></div>
+
+      <!-- ── Section: Approved Terms ── -->
+      <div id="uw-terms-section">
+        <div class="section-label" style="margin-bottom:12px">
+          <i class="ti ti-receipt" style="margin-right:4px"></i>Approved Terms
+        </div>
+        <div class="form-grid">
+
+          <div class="field">
+            <label>Approved Amount <span style="color:var(--muted);font-size:10px">(฿)</span></label>
+            <input type="number" id="uw-approved-amount"
+              min="0" step="1000" placeholder="เช่น 500000">
+          </div>
+
+          <div class="field">
+            <label>Interest Rate <span style="color:var(--muted);font-size:10px">(%)</span></label>
+            <input type="number" id="uw-approved-rate"
+              min="0" max="100" step="0.01" placeholder="เช่น 6.50">
+          </div>
+
+          <div class="field">
+            <label>Tenure <span style="color:var(--muted);font-size:10px">(months)</span></label>
+            <input type="number" id="uw-approved-tenure"
+              min="1" max="360" placeholder="เช่น 60">
+          </div>
+
+        </div>
+        <div class="divider" style="margin:16px 0"></div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn" onclick="closeModal('modal-uw-review')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitUwReview()">
+          <i class="ti ti-check" aria-hidden="true"></i> Save decision
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modals: Loans ──────────────────────────────────────── -->
+
+<!-- Modal: Loan Detail (View) -->
+<div id="modal-loan-detail" class="modal-backdrop">
+  <div class="modal" style="width:580px">
+    <div class="modal-head">
+      <span class="modal-title">Loan Detail</span>
+      <button class="modal-close" onclick="closeModal('modal-loan-detail')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+
+      <div class="kv-grid" style="gap:16px">
+        <div class="kv">
+          <label>Loan ID</label>
+          <span id="vl-loan-id">—</span>
+        </div>
+        <div class="kv">
+          <label>Application ID</label>
+          <span id="vl-app-id">—</span>
+        </div>
+        <div class="kv">
+          <label>Customer name</label>
+          <span id="vl-customer-name">—</span>
+        </div>
+        <div class="kv">
+          <label>Loan status</label>
+          <span id="vl-loan-status">—</span>
+        </div>
+      </div>
+
+      <div class="divider" style="margin:16px 0"></div>
+
+      <div class="section-label" style="margin-bottom:12px">
+        <i class="ti ti-receipt" style="margin-right:4px"></i>Approved Terms
+      </div>
+      <div class="kv-grid" style="gap:16px">
+        <div class="kv">
+          <label>Approved Amount</label>
+          <span id="vl-amount" style="font-weight:500">—</span>
+        </div>
+        <div class="kv">
+          <label>Interest Rate</label>
+          <span id="vl-rate">—</span>
+        </div>
+        <div class="kv">
+          <label>Tenure</label>
+          <span id="vl-tenure">—</span>
+        </div>
+        <div class="kv">
+          <label>Disbursement Date</label>
+          <span id="vl-disbursement">—</span>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top:16px">
+        <button class="btn" onclick="closeModal('modal-loan-detail')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Edit Loan Status -->
+<div id="modal-loan-edit" class="modal-backdrop">
+  <div class="modal" style="width:400px">
+    <div class="modal-head">
+      <span class="modal-title">Edit Loan Status</span>
+      <button class="modal-close" onclick="closeModal('modal-loan-edit')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-loan-id">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:14px">
+        Loan <strong id="edit-loan-label"></strong>
+      </p>
+      <div class="field">
+        <label>Loan Status</label>
+        <select id="edit-loan-status">
+          <option value="Active">Active</option>
+          <option value="Closed">Closed</option>
+          <option value="Defaulted">Defaulted</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button class="btn" onclick="closeModal('modal-loan-edit')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitEditLoanStatus()">
+          <i class="ti ti-check" aria-hidden="true"></i> Save changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirm Delete Loan -->
+<div id="modal-loan-delete" class="modal-backdrop">
+  <div class="modal" style="width:400px">
+    <div class="modal-head">
+      <span class="modal-title">Move to trash?</span>
+      <button class="modal-close" onclick="closeModal('modal-loan-delete')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);line-height:1.6">
+        Loan <strong id="delete-loan-label"></strong>
+        จะถูกย้ายไปยัง Trash<br>
+        สามารถกู้คืนได้ภายหลังจากหน้า Trash
+      </p>
+      <div class="form-actions">
+        <button class="btn" onclick="closeModal('modal-loan-delete')">Cancel</button>
+        <button class="btn btn-danger" onclick="confirmDeleteLoan()">
+          <i class="ti ti-trash" aria-hidden="true"></i> Move to trash
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
+
 <script>
 // ================================================================
 // CONFIG — ใส่ค่าจาก Supabase project ของคุณตรงนี้
@@ -1759,21 +2090,649 @@ async function confirmDeleteApplication() {
 }
 
 // -- Customers --
-pageLoaders['customers'] = async function() {
+// ================================================================
+// PAGE: CUSTOMERS
+// ================================================================
+
+let customersData = []
+
+pageLoaders['customers'] = async function () {
   document.getElementById('customers-content').innerHTML =
-    '<div class="loading">กำลังโหลด...</div>'
+    '<div class="loading"><i class="ti ti-loader"></i> กำลังโหลด...</div>'
+
+  const rows = await query(d =>
+    d.from('customer')
+      .select('customer_id, customer_name, customer_ac_no, customer_birthday, customer_address')
+      .order('customer_id', { ascending: false })
+  )
+
+  if (!rows) {
+    document.getElementById('customers-content').innerHTML =
+      '<div class="empty">โหลดข้อมูลไม่สำเร็จ</div>'
+    return
+  }
+
+  customersData = rows
+  renderCustomersTable(rows)
+}
+
+function renderCustomersTable(rows) {
+  const html = `
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">ลูกค้าทั้งหมด
+          <span class="tag" style="margin-left:6px">${rows.length}</span>
+        </span>
+        <div class="search-wrap" style="min-width:220px">
+          <i class="ti ti-search"></i>
+          <input type="text"
+            placeholder="ค้นหาชื่อ / เลขบัญชี..."
+            oninput="filterCustomers(this.value)"
+            style="padding-left:32px;border:0.5px solid var(--border);
+                   border-radius:6px;padding:7px 10px 7px 32px;
+                   font-size:13px;background:var(--surface);width:100%;
+                   outline:none;font-family:inherit">
+        </div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Account no.</th>
+              <th>Customer name</th>
+              <th>Date of birth</th>
+              <th>Address</th>
+              <th style="width:90px"></th>
+            </tr>
+          </thead>
+          <tbody id="cust-tbody">
+            ${renderCustomerRows(rows)}
+          </tbody>
+        </table>
+        ${rows.length === 0 ? '<div class="empty">ยังไม่มีข้อมูลลูกค้า</div>' : ''}
+      </div>
+    </div>`
+
+  document.getElementById('customers-content').innerHTML = html
+}
+
+function renderCustomerRows(rows) {
+  if (!rows.length) return ''
+  return rows.map(c => `
+    <tr class="tbl-row">
+      <td><span class="tag">${c.customer_ac_no ?? '—'}</span></td>
+      <td style="font-weight:500">${c.customer_name ?? '—'}</td>
+      <td>${formatDate(c.customer_birthday)}</td>
+      <td style="max-width:240px;overflow:hidden;
+                 text-overflow:ellipsis;white-space:nowrap;
+                 color:var(--muted)">
+        ${c.customer_address ?? '—'}
+      </td>
+      <td>
+        <div style="display:flex;gap:4px;justify-content:flex-end">
+          <button class="btn btn-sm"
+            onclick="openViewCustomer(${c.customer_id})"
+            title="View">
+            <i class="ti ti-eye" aria-hidden="true"></i>
+          </button>
+          <button class="btn btn-sm"
+            onclick="openEditCustomer(${c.customer_id})"
+            title="Edit">
+            <i class="ti ti-pencil" aria-hidden="true"></i>
+          </button>
+        </div>
+      </td>
+    </tr>`).join('')
+}
+
+function filterCustomers(q) {
+  const term = q.toLowerCase()
+  const filtered = customersData.filter(c =>
+    (c.customer_name  ?? '').toLowerCase().includes(term) ||
+    (c.customer_ac_no ?? '').toLowerCase().includes(term)
+  )
+  document.getElementById('cust-tbody').innerHTML = renderCustomerRows(filtered)
+}
+
+function openViewCustomer(id) {
+  const c = customersData.find(x => x.customer_id === id)
+  if (!c) return
+
+  document.getElementById('edit-cust-id').value   = c.customer_id
+  document.getElementById('edit-cust-name').value = c.customer_name      ?? ''
+  document.getElementById('edit-cust-ac').value   = c.customer_ac_no     ?? ''
+  document.getElementById('edit-cust-bday').value = c.customer_birthday  ?? ''
+  document.getElementById('edit-cust-addr').value = c.customer_address   ?? ''
+
+  ;['edit-cust-name','edit-cust-ac','edit-cust-bday','edit-cust-addr'].forEach(elId => {
+    const el = document.getElementById(elId)
+    el.setAttribute('disabled', true)
+    el.style.background = 'var(--bg)'
+  })
+
+  document.querySelector('#modal-customer-edit .modal-title').textContent = 'Customer detail'
+  document.querySelector('#modal-customer-edit .btn-primary').style.display = 'none'
+  openModal('modal-customer-edit')
+}
+
+function openEditCustomer(id) {
+  const c = customersData.find(x => x.customer_id === id)
+  if (!c) return
+
+  document.getElementById('edit-cust-id').value   = c.customer_id
+  document.getElementById('edit-cust-name').value = c.customer_name      ?? ''
+  document.getElementById('edit-cust-ac').value   = c.customer_ac_no     ?? ''
+  document.getElementById('edit-cust-bday').value = c.customer_birthday  ?? ''
+  document.getElementById('edit-cust-addr').value = c.customer_address   ?? ''
+
+  ;['edit-cust-name','edit-cust-ac','edit-cust-bday','edit-cust-addr'].forEach(elId => {
+    const el = document.getElementById(elId)
+    el.removeAttribute('disabled')
+    el.style.background = ''
+  })
+
+  document.querySelector('#modal-customer-edit .modal-title').textContent = 'Edit customer'
+  document.querySelector('#modal-customer-edit .btn-primary').style.display = ''
+  openModal('modal-customer-edit')
+}
+
+async function submitEditCustomer() {
+  const id   = Number(document.getElementById('edit-cust-id').value)
+  const name = document.getElementById('edit-cust-name').value.trim()
+  const ac   = document.getElementById('edit-cust-ac').value.trim()
+  const bday = document.getElementById('edit-cust-bday').value || null
+  const addr = document.getElementById('edit-cust-addr').value.trim()
+
+  if (!name) return toast('กรุณาใส่ชื่อลูกค้า', 'error')
+  if (!ac)   return toast('กรุณาใส่เลขบัญชี', 'error')
+
+  const result = await query(d =>
+    d.from('customer')
+      .update({ customer_name: name, customer_ac_no: ac,
+                customer_birthday: bday, customer_address: addr })
+      .eq('customer_id', id)
+      .select()
+  )
+
+  if (result) {
+    toast('แก้ไขข้อมูลเรียบร้อย', 'success')
+    closeModal('modal-customer-edit')
+    await pageLoaders['customers']()
+  } else {
+    toast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error')
+  }
+}
+
+async function submitAddCustomer() {
+  const name = document.getElementById('add-cust-name').value.trim()
+  const ac   = document.getElementById('add-cust-ac').value.trim()
+  const bday = document.getElementById('add-cust-bday').value || null
+  const addr = document.getElementById('add-cust-addr').value.trim()
+
+  if (!name) return toast('กรุณาใส่ชื่อลูกค้า', 'error')
+  if (!ac)   return toast('กรุณาใส่เลขบัญชี', 'error')
+
+  const result = await query(d =>
+    d.from('customer')
+      .insert({ customer_name: name, customer_ac_no: ac,
+                customer_birthday: bday, customer_address: addr })
+      .select()
+  )
+
+  if (result) {
+    toast('เพิ่มลูกค้าเรียบร้อย', 'success')
+    closeModal('modal-customer-add')
+    ;['add-cust-name','add-cust-ac','add-cust-bday','add-cust-addr']
+      .forEach(id => document.getElementById(id).value = '')
+    await pageLoaders['customers']()
+  } else {
+    toast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error')
+  }
 }
 
 // -- Underwriting --
-pageLoaders['underwriting'] = async function() {
+// ================================================================
+// PAGE: UNDERWRITING
+// ================================================================
+
+let uwData = []
+let uwFilter = 'All'
+
+pageLoaders['underwriting'] = async function () {
   document.getElementById('underwriting-content').innerHTML =
-    '<div class="loading">กำลังโหลด...</div>'
+    '<div class="loading"><i class="ti ti-loader"></i> กำลังโหลด...</div>'
+
+  // ดึง underwriting พร้อม join application เพื่อแสดง APP-XXXX
+  const rows = await query(d =>
+    d.from('underwriting')
+      .select(`
+        underwriting_id,
+        application_id,
+        credit_score,
+        risk_rating,
+        dti_ratio,
+        decision,
+        conditions,
+        approved_amount,
+        approved_rate,
+        approved_tenure_months,
+        underwritten_at
+      `)
+      .order('underwritten_at', { ascending: false })
+  )
+
+  if (!rows) {
+    document.getElementById('underwriting-content').innerHTML =
+      '<div class="empty">โหลดข้อมูลไม่สำเร็จ</div>'
+    return
+  }
+
+  uwData = rows
+  uwFilter = 'All'
+  renderUwPage(rows)
+}
+
+// ── render ทั้งหน้า (filter chips + ตาราง) ───────────────────────
+function renderUwPage(rows) {
+  const decisions = ['All', 'Pending', 'Clear to Close',
+                     'Conditional Approval', 'Suspended', 'Denied']
+
+  const chips = decisions.map(d => `
+    <span class="chip ${uwFilter === d ? 'on' : ''}"
+      onclick="setUwFilter('${d}')">
+      ${d}
+    </span>`).join('')
+
+  const filtered = uwFilter === 'All'
+    ? rows
+    : rows.filter(r => r.decision === uwFilter)
+
+  const html = `
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">
+          Underwriting Cases
+          <span class="tag" style="margin-left:6px">${filtered.length}</span>
+        </span>
+        <div class="filter-row">${chips}</div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>App ID</th>
+              <th>Credit Score</th>
+              <th>Risk</th>
+              <th>DTI</th>
+              <th>Decision</th>
+              <th>Underwritten at</th>
+              <th style="width:80px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${renderUwRows(filtered)}
+          </tbody>
+        </table>
+        ${filtered.length === 0
+          ? '<div class="empty">ไม่มีข้อมูลในหมวดนี้</div>'
+          : ''}
+      </div>
+    </div>`
+
+  document.getElementById('underwriting-content').innerHTML = html
+}
+
+// ── render แถว ───────────────────────────────────────────────────
+function renderUwRows(rows) {
+  if (!rows.length) return ''
+  return rows.map(r => `
+    <tr class="tbl-row">
+      <td>
+        <span class="tag">APP-${String(r.application_id).padStart(4,'0')}</span>
+      </td>
+      <td>${r.credit_score ?? '—'}</td>
+      <td>${r.risk_rating ? statusBadge(r.risk_rating) : '—'}</td>
+      <td>${r.dti_ratio != null
+            ? Number(r.dti_ratio).toFixed(2) + '%'
+            : '—'}</td>
+      <td>${statusBadge(r.decision ?? 'Pending')}</td>
+      <td style="color:var(--muted)">${formatDate(r.underwritten_at)}</td>
+      <td>
+        <button class="btn btn-sm btn-primary"
+          onclick="openUwReview(${r.underwriting_id})">
+          <i class="ti ti-clipboard-check" aria-hidden="true"></i> Review
+        </button>
+      </td>
+    </tr>`).join('')
+}
+
+// ── filter by decision chip ───────────────────────────────────────
+function setUwFilter(decision) {
+  uwFilter = decision
+  renderUwPage(uwData)
+}
+
+// ── เปิด modal Review ─────────────────────────────────────────────
+function openUwReview(uwId) {
+  const r = uwData.find(x => x.underwriting_id === uwId)
+  if (!r) return
+
+  document.getElementById('uw-id').value              = r.underwriting_id
+  document.getElementById('uw-app-id').value          = r.application_id
+  document.getElementById('uw-credit-score').value   = r.credit_score          ?? ''
+  document.getElementById('uw-risk-rating').value    = r.risk_rating            ?? ''
+  document.getElementById('uw-dti').value            = r.dti_ratio              ?? ''
+  document.getElementById('uw-decision').value       = r.decision               ?? 'Pending'
+  document.getElementById('uw-conditions').value     = r.conditions             ?? ''
+  document.getElementById('uw-approved-amount').value= r.approved_amount        ?? ''
+  document.getElementById('uw-approved-rate').value  = r.approved_rate          ?? ''
+  document.getElementById('uw-approved-tenure').value= r.approved_tenure_months ?? ''
+
+  // อัปเดต UI ตาม decision ปัจจุบัน
+  onUwDecisionChange()
+
+  openModal('modal-uw-review')
+}
+
+// ── toggle UI ตาม decision ────────────────────────────────────────
+function onUwDecisionChange() {
+  const decision = document.getElementById('uw-decision').value
+
+  // Conditions: บังคับกรอกถ้าไม่ใช่ Clear to Close
+  const isClearToClose = decision === 'Clear to Close'
+  document.getElementById('uw-conditions-required').style.display =
+    isClearToClose ? 'none' : 'inline'
+
+  // Approved Terms: ซ่อนถ้าเป็น Suspended หรือ Denied
+  const hideTerms = decision === 'Suspended' || decision === 'Denied'
+  document.getElementById('uw-terms-section').style.display =
+    hideTerms ? 'none' : 'block'
+
+  // ล้าง approved fields ถ้าซ่อน
+  if (hideTerms) {
+    document.getElementById('uw-approved-amount').value  = ''
+    document.getElementById('uw-approved-rate').value    = ''
+    document.getElementById('uw-approved-tenure').value  = ''
+  }
+}
+
+// ── submit Review (UPDATE) ────────────────────────────────────────
+async function submitUwReview() {
+  const uwId      = Number(document.getElementById('uw-id').value)
+  const decision  = document.getElementById('uw-decision').value
+  const conditions= document.getElementById('uw-conditions').value.trim()
+
+  // validate: conditions บังคับถ้าไม่ใช่ Clear to Close
+  if (decision !== 'Clear to Close' && !conditions)
+    return toast('กรุณาระบุ Conditions', 'error')
+
+  const credit_score = Number(document.getElementById('uw-credit-score').value) || null
+  const risk_rating  = document.getElementById('uw-risk-rating').value || null
+  const dti_ratio    = document.getElementById('uw-dti').value !== ''
+    ? Number(document.getElementById('uw-dti').value)
+    : null
+
+  // validate credit score range
+  if (credit_score && (credit_score < 300 || credit_score > 850))
+    return toast('Credit Score ต้องอยู่ระหว่าง 300–850', 'error')
+
+  const hideTerms = decision === 'Suspended' || decision === 'Denied'
+  const approved_amount         = hideTerms ? null
+    : (Number(document.getElementById('uw-approved-amount').value) || null)
+  const approved_rate           = hideTerms ? null
+    : (document.getElementById('uw-approved-rate').value !== ''
+        ? Number(document.getElementById('uw-approved-rate').value)
+        : null)
+  const approved_tenure_months  = hideTerms ? null
+    : (Number(document.getElementById('uw-approved-tenure').value) || null)
+
+  const result = await query(d =>
+    d.from('underwriting')
+      .update({
+        credit_score,
+        risk_rating,
+        dti_ratio,
+        decision,
+        conditions: conditions || null,
+        approved_amount,
+        approved_rate,
+        approved_tenure_months,
+        underwritten_at: new Date().toISOString()
+      })
+      .eq('underwriting_id', uwId)
+      .select()
+  )
+
+  if (result) {
+    toast('บันทึก Underwriting เรียบร้อย', 'success')
+    closeModal('modal-uw-review')
+    await pageLoaders['underwriting']()
+  } else {
+    toast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error')
+  }
 }
 
 // -- Loans --
-pageLoaders['loans'] = async function() {
+// ================================================================
+// PAGE: LOANS
+// ================================================================
+
+let loansData   = []
+let loanFilter  = 'All'
+
+pageLoaders['loans'] = async function () {
   document.getElementById('loans-content').innerHTML =
-    '<div class="loading">กำลังโหลด...</div>'
+    '<div class="loading"><i class="ti ti-loader"></i> กำลังโหลด...</div>'
+
+  // join loan_application → customer เพื่อดึง customer_name
+  const rows = await query(d =>
+    d.from('loan')
+      .select(`
+        loan_id,
+        application_id,
+        approved_amount,
+        interest_rate,
+        tenure_months,
+        disbursement_date,
+        loan_status,
+        loan_application (
+          customer_id,
+          customer (
+            customer_name
+          )
+        )
+      `)
+      .eq('is_deleted', false)
+      .order('loan_id', { ascending: false })
+  )
+
+  if (!rows) {
+    document.getElementById('loans-content').innerHTML =
+      '<div class="empty">โหลดข้อมูลไม่สำเร็จ</div>'
+    return
+  }
+
+  // flatten customer_name ขึ้นมาระดับบนเพื่อสะดวกใช้งาน
+  loansData = rows.map(r => ({
+    ...r,
+    customer_name: r.loan_application?.customer?.customer_name ?? '—'
+  }))
+
+  loanFilter = 'All'
+  renderLoansPage(loansData)
+}
+
+// ── render ทั้งหน้า ───────────────────────────────────────────────
+function renderLoansPage(rows) {
+  const statuses = ['All', 'Active', 'Closed', 'Defaulted']
+
+  const chips = statuses.map(s => `
+    <span class="chip ${loanFilter === s ? 'on' : ''}"
+      onclick="setLoanFilter('${s}')">
+      ${s}
+    </span>`).join('')
+
+  const filtered = loanFilter === 'All'
+    ? rows
+    : rows.filter(r => r.loan_status === loanFilter)
+
+  const html = `
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">
+          All Loans
+          <span class="tag" style="margin-left:6px">${filtered.length}</span>
+        </span>
+        <div class="filter-row">${chips}</div>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Loan ID</th>
+              <th>App ID</th>
+              <th>Customer</th>
+              <th>Status</th>
+              <th style="width:180px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${renderLoanRows(filtered)}
+          </tbody>
+        </table>
+        ${filtered.length === 0
+          ? '<div class="empty">ไม่มีข้อมูลในหมวดนี้</div>'
+          : ''}
+      </div>
+    </div>`
+
+  document.getElementById('loans-content').innerHTML = html
+}
+
+// ── render แถว ───────────────────────────────────────────────────
+function renderLoanRows(rows) {
+  if (!rows.length) return ''
+  return rows.map(r => `
+    <tr class="tbl-row">
+      <td><span class="tag">LN-${String(r.loan_id).padStart(4,'0')}</span></td>
+      <td><span class="tag">APP-${String(r.application_id).padStart(4,'0')}</span></td>
+      <td style="font-weight:500">${r.customer_name}</td>
+      <td>${statusBadge(r.loan_status ?? 'Active')}</td>
+      <td>
+        <div style="display:flex;gap:4px;justify-content:flex-end">
+          <button class="btn btn-sm"
+            onclick="openLoanDetail(${r.loan_id})"
+            title="View Detail">
+            <i class="ti ti-eye" aria-hidden="true"></i> Detail
+          </button>
+          <button class="btn btn-sm"
+            onclick="openEditLoanStatus(${r.loan_id})"
+            title="Edit Status">
+            <i class="ti ti-pencil" aria-hidden="true"></i> Status
+          </button>
+          <button class="btn btn-sm btn-danger"
+            onclick="openDeleteLoan(${r.loan_id})"
+            title="Move to trash">
+            <i class="ti ti-trash" aria-hidden="true"></i>
+          </button>
+        </div>
+      </td>
+    </tr>`).join('')
+}
+
+// ── filter chip ───────────────────────────────────────────────────
+function setLoanFilter(status) {
+  loanFilter = status
+  renderLoansPage(loansData)
+}
+
+// ── View Detail ───────────────────────────────────────────────────
+function openLoanDetail(loanId) {
+  const r = loansData.find(x => x.loan_id === loanId)
+  if (!r) return
+
+  document.getElementById('vl-loan-id').textContent =
+    `LN-${String(r.loan_id).padStart(4,'0')}`
+  document.getElementById('vl-app-id').textContent =
+    `APP-${String(r.application_id).padStart(4,'0')}`
+  document.getElementById('vl-customer-name').textContent = r.customer_name
+  document.getElementById('vl-loan-status').innerHTML    = statusBadge(r.loan_status)
+  document.getElementById('vl-amount').textContent       = formatBaht(r.approved_amount)
+  document.getElementById('vl-rate').textContent         =
+    r.interest_rate != null ? Number(r.interest_rate).toFixed(2) + '%' : '—'
+  document.getElementById('vl-tenure').textContent       =
+    r.tenure_months != null ? r.tenure_months + ' months' : '—'
+  document.getElementById('vl-disbursement').textContent = formatDate(r.disbursement_date)
+
+  openModal('modal-loan-detail')
+}
+
+// ── Edit Status ───────────────────────────────────────────────────
+function openEditLoanStatus(loanId) {
+  const r = loansData.find(x => x.loan_id === loanId)
+  if (!r) return
+
+  document.getElementById('edit-loan-id').value    = r.loan_id
+  document.getElementById('edit-loan-label').textContent =
+    `LN-${String(r.loan_id).padStart(4,'0')}`
+  document.getElementById('edit-loan-status').value = r.loan_status ?? 'Active'
+
+  openModal('modal-loan-edit')
+}
+
+async function submitEditLoanStatus() {
+  const loanId      = Number(document.getElementById('edit-loan-id').value)
+  const loan_status = document.getElementById('edit-loan-status').value
+
+  const result = await query(d =>
+    d.from('loan')
+      .update({ loan_status })
+      .eq('loan_id', loanId)
+      .select()
+  )
+
+  if (result) {
+    toast('อัปเดต Loan Status เรียบร้อย', 'success')
+    closeModal('modal-loan-edit')
+    await pageLoaders['loans']()
+  } else {
+    toast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error')
+  }
+}
+
+// ── Soft Delete ───────────────────────────────────────────────────
+function openDeleteLoan(loanId) {
+  const r = loansData.find(x => x.loan_id === loanId)
+  if (!r) return
+
+  document.getElementById('delete-loan-label').textContent =
+    `LN-${String(r.loan_id).padStart(4,'0')}`
+  document.querySelector('#modal-loan-delete .btn-danger').dataset.loanId = loanId
+
+  openModal('modal-loan-delete')
+}
+
+async function confirmDeleteLoan() {
+  const loanId = Number(
+    document.querySelector('#modal-loan-delete .btn-danger').dataset.loanId
+  )
+
+  const result = await query(d =>
+    d.from('loan')
+      .update({
+        is_deleted: true,
+        deleted_at: new Date().toISOString()
+      })
+      .eq('loan_id', loanId)
+  )
+
+  if (result !== null) {
+    toast('ย้ายไป Trash เรียบร้อย', 'success')
+    closeModal('modal-loan-delete')
+    await pageLoaders['loans']()
+  } else {
+    toast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error')
+  }
 }
 
 // -- Trash --
