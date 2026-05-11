@@ -900,7 +900,173 @@
   </div>
 </div>
 
+<!-- ── Modals: Trash ──────────────────────────────────────── -->
 
+<!-- Modal: View Deleted Application Detail -->
+<div id="modal-trash-app-detail" class="modal-backdrop">
+  <div class="modal" style="width:580px">
+    <div class="modal-head">
+      <span class="modal-title">Application Detail</span>
+      <button class="modal-close" onclick="closeModal('modal-trash-app-detail')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="kv-grid" style="gap:16px">
+        <div class="kv">
+          <label>Application ID</label>
+          <span id="td-app-id">—</span>
+        </div>
+        <div class="kv">
+          <label>Customer ID</label>
+          <span id="td-customer-id">—</span>
+        </div>
+        <div class="kv">
+          <label>Customer name</label>
+          <span id="td-customer-name">—</span>
+        </div>
+        <div class="kv">
+          <label>Applicant type</label>
+          <span id="td-applicant-type">—</span>
+        </div>
+        <div class="kv">
+          <label>Branch ID</label>
+          <span id="td-branch-id">—</span>
+        </div>
+        <div class="kv">
+          <label>Application status</label>
+          <span id="td-app-status">—</span>
+        </div>
+      </div>
+
+      <div class="divider" style="margin:16px 0"></div>
+
+      <div class="section-label" style="margin-bottom:12px">
+        <i class="ti ti-cash" style="margin-right:4px"></i>Loan Request
+      </div>
+      <div class="kv-grid" style="gap:16px">
+        <div class="kv">
+          <label>Requested Amount</label>
+          <span id="td-req-amount" style="font-weight:500">—</span>
+        </div>
+        <div class="kv">
+          <label>Requested Tenure</label>
+          <span id="td-req-tenure">—</span>
+        </div>
+        <div class="kv">
+          <label>Application Date</label>
+          <span id="td-app-date">—</span>
+        </div>
+        <div class="kv">
+          <label>Deleted at</label>
+          <span id="td-app-deleted-at" style="color:var(--red)">—</span>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top:16px">
+        <button class="btn" onclick="closeModal('modal-trash-app-detail')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: View Deleted Loan Detail -->
+<div id="modal-trash-loan-detail" class="modal-backdrop">
+  <div class="modal" style="width:580px">
+    <div class="modal-head">
+      <span class="modal-title">Loan Detail</span>
+      <button class="modal-close" onclick="closeModal('modal-trash-loan-detail')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="kv-grid" style="gap:16px">
+        <div class="kv">
+          <label>Loan ID</label>
+          <span id="tl-loan-id">—</span>
+        </div>
+        <div class="kv">
+          <label>Application ID</label>
+          <span id="tl-app-id">—</span>
+        </div>
+        <div class="kv">
+          <label>Customer name</label>
+          <span id="tl-customer-name">—</span>
+        </div>
+        <div class="kv">
+          <label>Loan status</label>
+          <span id="tl-loan-status">—</span>
+        </div>
+      </div>
+
+      <div class="divider" style="margin:16px 0"></div>
+
+      <div class="section-label" style="margin-bottom:12px">
+        <i class="ti ti-receipt" style="margin-right:4px"></i>Approved Terms
+      </div>
+      <div class="kv-grid" style="gap:16px">
+        <div class="kv">
+          <label>Approved Amount</label>
+          <span id="tl-amount" style="font-weight:500">—</span>
+        </div>
+        <div class="kv">
+          <label>Interest Rate</label>
+          <span id="tl-rate">—</span>
+        </div>
+        <div class="kv">
+          <label>Tenure</label>
+          <span id="tl-tenure">—</span>
+        </div>
+        <div class="kv">
+          <label>Disbursement Date</label>
+          <span id="tl-disbursement">—</span>
+        </div>
+        <div class="kv">
+          <label>Deleted at</label>
+          <span id="tl-deleted-at" style="color:var(--red)">—</span>
+        </div>
+      </div>
+
+      <div class="form-actions" style="margin-top:16px">
+        <button class="btn" onclick="closeModal('modal-trash-loan-detail')">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirm Permanently Delete -->
+<div id="modal-trash-purge" class="modal-backdrop">
+  <div class="modal" style="width:420px">
+    <div class="modal-head">
+      <span class="modal-title" style="color:var(--red)">
+        <i class="ti ti-alert-triangle" style="margin-right:4px"></i>
+        Permanently Delete?
+      </span>
+      <button class="modal-close" onclick="closeModal('modal-trash-purge')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);line-height:1.6">
+        <strong id="purge-label"></strong>
+        จะถูกลบออกจากระบบ<span style="color:var(--red);font-weight:500">อย่างถาวร</span><br>
+        ไม่สามารถกู้คืนได้อีก กรุณายืนยัน
+      </p>
+      <div style="background:var(--red-bg);border-radius:6px;
+                  padding:10px 14px;margin-top:12px;font-size:12px;
+                  color:var(--red);display:flex;gap:8px;align-items:flex-start">
+        <i class="ti ti-alert-circle" style="margin-top:1px;flex-shrink:0"></i>
+        การดำเนินการนี้ไม่สามารถย้อนกลับได้
+      </div>
+      <div class="form-actions">
+        <button class="btn" onclick="closeModal('modal-trash-purge')">Cancel</button>
+        <button class="btn btn-danger" id="purge-confirm-btn" onclick="confirmPurge()">
+          <i class="ti ti-trash-x" aria-hidden="true"></i> Delete permanently
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
 
 
 
@@ -2736,9 +2902,307 @@ async function confirmDeleteLoan() {
 }
 
 // -- Trash --
-pageLoaders['trash'] = async function() {
+// ================================================================
+// PAGE: TRASH
+// ================================================================
+
+let trashApps  = []
+let trashLoans = []
+
+pageLoaders['trash'] = async function () {
   document.getElementById('trash-content').innerHTML =
-    '<div class="loading">กำลังโหลด...</div>'
+    '<div class="loading"><i class="ti ti-loader"></i> กำลังโหลด...</div>'
+
+  // ── ดึง deleted applications ──────────────────────────────────
+  const apps = await query(d =>
+    d.from('loan_application')
+      .select(`
+        application_id,
+        customer_id,
+        applicant_type,
+        branch_id,
+        requested_amount,
+        requested_tenure_months,
+        application_date,
+        application_status,
+        deleted_at,
+        customer (
+          customer_name
+        )
+      `)
+      .eq('is_deleted', true)
+      .order('deleted_at', { ascending: false })
+  )
+
+  // ── ดึง deleted loans ─────────────────────────────────────────
+  const loans = await query(d =>
+    d.from('loan')
+      .select(`
+        loan_id,
+        application_id,
+        approved_amount,
+        interest_rate,
+        tenure_months,
+        disbursement_date,
+        loan_status,
+        deleted_at,
+        loan_application (
+          customer (
+            customer_name
+          )
+        )
+      `)
+      .eq('is_deleted', true)
+      .order('deleted_at', { ascending: false })
+  )
+
+  trashApps  = (apps  ?? []).map(r => ({
+    ...r,
+    customer_name: r.customer?.customer_name ?? '—'
+  }))
+  trashLoans = (loans ?? []).map(r => ({
+    ...r,
+    customer_name: r.loan_application?.customer?.customer_name ?? '—'
+  }))
+
+  renderTrashPage()
+}
+
+// ── render ทั้งหน้า ───────────────────────────────────────────────
+function renderTrashPage() {
+  const html = `
+    <!-- Section: Applications -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">
+          <i class="ti ti-file-description"
+             style="margin-right:6px;color:var(--muted)"></i>
+          Deleted Applications
+          <span class="tag" style="margin-left:6px">${trashApps.length}</span>
+        </span>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>App ID</th>
+              <th>Customer</th>
+              <th>Applicant type</th>
+              <th>App date</th>
+              <th>Status</th>
+              <th>Deleted at</th>
+              <th style="width:170px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${renderTrashAppRows()}
+          </tbody>
+        </table>
+        ${trashApps.length === 0
+          ? '<div class="empty">ไม่มีรายการใน Trash</div>'
+          : ''}
+      </div>
+    </div>
+
+    <!-- Section: Loans -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">
+          <i class="ti ti-cash"
+             style="margin-right:6px;color:var(--muted)"></i>
+          Deleted Loans
+          <span class="tag" style="margin-left:6px">${trashLoans.length}</span>
+        </span>
+      </div>
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Loan ID</th>
+              <th>App ID</th>
+              <th>Customer</th>
+              <th>Status</th>
+              <th>Deleted at</th>
+              <th style="width:170px"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${renderTrashLoanRows()}
+          </tbody>
+        </table>
+        ${trashLoans.length === 0
+          ? '<div class="empty">ไม่มีรายการใน Trash</div>'
+          : ''}
+      </div>
+    </div>`
+
+  document.getElementById('trash-content').innerHTML = html
+}
+
+// ── render แถว Applications ───────────────────────────────────────
+function renderTrashAppRows() {
+  if (!trashApps.length) return ''
+  return trashApps.map(r => `
+    <tr class="tbl-row">
+      <td><span class="tag">APP-${String(r.application_id).padStart(4,'0')}</span></td>
+      <td style="font-weight:500">${r.customer_name}</td>
+      <td>${r.applicant_type ?? '—'}</td>
+      <td style="color:var(--muted)">${formatDate(r.application_date)}</td>
+      <td>${statusBadge(r.application_status ?? '—')}</td>
+      <td style="color:var(--red);font-size:12px">${formatDate(r.deleted_at)}</td>
+      <td>
+        <div style="display:flex;gap:4px;justify-content:flex-end">
+          <button class="btn btn-sm"
+            onclick="openTrashAppDetail(${r.application_id})"
+            title="View Detail">
+            <i class="ti ti-eye" aria-hidden="true"></i>
+          </button>
+          <button class="btn btn-sm"
+            style="color:var(--green);border-color:#c3dba8"
+            onclick="restoreRecord('application', ${r.application_id})"
+            title="Restore">
+            <i class="ti ti-restore" aria-hidden="true"></i> Restore
+          </button>
+          <button class="btn btn-sm btn-danger"
+            onclick="openPurge('application', ${r.application_id},
+              'APP-${String(r.application_id).padStart(4,'0')}')"
+            title="Delete permanently">
+            <i class="ti ti-trash-x" aria-hidden="true"></i>
+          </button>
+        </div>
+      </td>
+    </tr>`).join('')
+}
+
+// ── render แถว Loans ──────────────────────────────────────────────
+function renderTrashLoanRows() {
+  if (!trashLoans.length) return ''
+  return trashLoans.map(r => `
+    <tr class="tbl-row">
+      <td><span class="tag">LN-${String(r.loan_id).padStart(4,'0')}</span></td>
+      <td><span class="tag">APP-${String(r.application_id).padStart(4,'0')}</span></td>
+      <td style="font-weight:500">${r.customer_name}</td>
+      <td>${statusBadge(r.loan_status ?? 'Active')}</td>
+      <td style="color:var(--red);font-size:12px">${formatDate(r.deleted_at)}</td>
+      <td>
+        <div style="display:flex;gap:4px;justify-content:flex-end">
+          <button class="btn btn-sm"
+            onclick="openTrashLoanDetail(${r.loan_id})"
+            title="View Detail">
+            <i class="ti ti-eye" aria-hidden="true"></i>
+          </button>
+          <button class="btn btn-sm"
+            style="color:var(--green);border-color:#c3dba8"
+            onclick="restoreRecord('loan', ${r.loan_id})"
+            title="Restore">
+            <i class="ti ti-restore" aria-hidden="true"></i> Restore
+          </button>
+          <button class="btn btn-sm btn-danger"
+            onclick="openPurge('loan', ${r.loan_id},
+              'LN-${String(r.loan_id).padStart(4,'0')}')"
+            title="Delete permanently">
+            <i class="ti ti-trash-x" aria-hidden="true"></i>
+          </button>
+        </div>
+      </td>
+    </tr>`).join('')
+}
+
+// ── View Detail: Application ──────────────────────────────────────
+function openTrashAppDetail(appId) {
+  const r = trashApps.find(x => x.application_id === appId)
+  if (!r) return
+
+  document.getElementById('td-app-id').textContent =
+    `APP-${String(r.application_id).padStart(4,'0')}`
+  document.getElementById('td-customer-id').textContent  = r.customer_id ?? '—'
+  document.getElementById('td-customer-name').textContent= r.customer_name
+  document.getElementById('td-applicant-type').textContent = r.applicant_type ?? '—'
+  document.getElementById('td-branch-id').textContent    = r.branch_id ?? '—'
+  document.getElementById('td-app-status').innerHTML     = statusBadge(r.application_status)
+  document.getElementById('td-req-amount').textContent   = formatBaht(r.requested_amount)
+  document.getElementById('td-req-tenure').textContent   =
+    r.requested_tenure_months != null ? r.requested_tenure_months + ' months' : '—'
+  document.getElementById('td-app-date').textContent     = formatDate(r.application_date)
+  document.getElementById('td-app-deleted-at').textContent = formatDate(r.deleted_at)
+
+  openModal('modal-trash-app-detail')
+}
+
+// ── View Detail: Loan ─────────────────────────────────────────────
+function openTrashLoanDetail(loanId) {
+  const r = trashLoans.find(x => x.loan_id === loanId)
+  if (!r) return
+
+  document.getElementById('tl-loan-id').textContent =
+    `LN-${String(r.loan_id).padStart(4,'0')}`
+  document.getElementById('tl-app-id').textContent =
+    `APP-${String(r.application_id).padStart(4,'0')}`
+  document.getElementById('tl-customer-name').textContent = r.customer_name
+  document.getElementById('tl-loan-status').innerHTML     = statusBadge(r.loan_status)
+  document.getElementById('tl-amount').textContent        = formatBaht(r.approved_amount)
+  document.getElementById('tl-rate').textContent          =
+    r.interest_rate != null ? Number(r.interest_rate).toFixed(2) + '%' : '—'
+  document.getElementById('tl-tenure').textContent        =
+    r.tenure_months != null ? r.tenure_months + ' months' : '—'
+  document.getElementById('tl-disbursement').textContent  = formatDate(r.disbursement_date)
+  document.getElementById('tl-deleted-at').textContent    = formatDate(r.deleted_at)
+
+  openModal('modal-trash-loan-detail')
+}
+
+// ── Restore ───────────────────────────────────────────────────────
+async function restoreRecord(type, id) {
+  const tableMap = {
+    application: { table: 'loan_application', pk: 'application_id' },
+    loan:        { table: 'loan',             pk: 'loan_id'         },
+  }
+  const { table, pk } = tableMap[type]
+
+  const result = await query(d =>
+    d.from(table)
+      .update({ is_deleted: false, deleted_at: null })
+      .eq(pk, id)
+  )
+
+  if (result !== null) {
+    toast('กู้คืนข้อมูลเรียบร้อย', 'success')
+    await pageLoaders['trash']()
+  } else {
+    toast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error')
+  }
+}
+
+// ── Permanently Delete ────────────────────────────────────────────
+function openPurge(type, id, label) {
+  document.getElementById('purge-label').textContent = label
+  const btn = document.getElementById('purge-confirm-btn')
+  btn.dataset.purgeType = type
+  btn.dataset.purgeId   = id
+  openModal('modal-trash-purge')
+}
+
+async function confirmPurge() {
+  const btn  = document.getElementById('purge-confirm-btn')
+  const type = btn.dataset.purgeType
+  const id   = Number(btn.dataset.purgeId)
+
+  const tableMap = {
+    application: { table: 'loan_application', pk: 'application_id' },
+    loan:        { table: 'loan',             pk: 'loan_id'         },
+  }
+  const { table, pk } = tableMap[type]
+
+  const { error } = await db.from(table).delete().eq(pk, id)
+
+  if (!error) {
+    toast('ลบถาวรเรียบร้อย', 'success')
+    closeModal('modal-trash-purge')
+    await pageLoaders['trash']()
+  } else {
+    console.error(error)
+    toast('เกิดข้อผิดพลาด: ' + error.message, 'error')
+  }
 }
 
 // ================================================================
