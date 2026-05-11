@@ -1,0 +1,1791 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LoanFlow</title>
+
+  <!-- Supabase JS SDK -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Tabler Icons -->
+  <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+
+  <!-- Sarabun font — รองรับภาษาไทย -->
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;500&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ── reset ────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── design tokens ────────────────────────────────── */
+    :root {
+      --navy:      #0f1f3d;
+      --navy2:     #1a3260;
+      --gold:      #c9a84c;
+      --surface:   #ffffff;
+      --bg:        #f5f4f0;
+      --border:    rgba(0,0,0,0.10);
+      --muted:     #6b6b6b;
+      --ink:       #1c1c1c;
+      /* semantic */
+      --green:     #27500A; --green-bg:  #EAF3DE;
+      --amber:     #633806; --amber-bg:  #FAEEDA;
+      --red:       #791F1F; --red-bg:    #FCEBEB;
+      --blue:      #0C447C; --blue-bg:   #E6F1FB;
+      --purple:    #3C3489; --purple-bg: #EEEDFE;
+      --gray:      #444441; --gray-bg:   #F1EFE8;
+    }
+
+    body {
+      font-family: 'Sarabun', 'Inter', sans-serif;
+      font-size: 14px;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    /* ── app shell ────────────────────────────────────── */
+    .shell   { display: flex; height: 100vh; overflow: hidden; }
+    .sidebar { width: 200px; background: var(--navy); flex-shrink: 0;
+               display: flex; flex-direction: column; overflow-y: auto; }
+    .main    { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+    .topbar  { background: var(--surface); border-bottom: 0.5px solid var(--border);
+               padding: 14px 20px; display: flex; align-items: center;
+               justify-content: space-between; flex-shrink: 0; }
+    .content { padding: 16px 20px; flex: 1; overflow-y: auto;
+               display: flex; flex-direction: column; gap: 14px; }
+
+    /* ── sidebar ──────────────────────────────────────── */
+    .sidebar-logo { padding: 18px 16px 14px;
+                    border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .logo-mark    { font-size: 10px; letter-spacing: .12em;
+                    color: var(--gold); text-transform: uppercase; }
+    .logo-name    { font-size: 16px; color: #fff; margin-top: 3px; font-weight: 500; }
+    .nav-section  { padding: 12px 0 4px; }
+    .nav-label    { font-size: 10px; letter-spacing: .1em;
+                    color: rgba(255,255,255,0.3); padding: 0 16px 4px;
+                    text-transform: uppercase; display: block; }
+    .nav-item     { display: flex; align-items: center; gap: 8px; padding: 8px 16px;
+                    color: rgba(255,255,255,0.55); font-size: 13px; cursor: pointer;
+                    border-left: 2px solid transparent; text-decoration: none;
+                    transition: all .15s; user-select: none; }
+    .nav-item:hover  { color: #fff; background: rgba(255,255,255,0.06); }
+    .nav-item.active { color: #fff; border-left-color: var(--gold);
+                       background: rgba(201,168,76,0.1); }
+    .nav-item i   { font-size: 16px; }
+
+    /* ── page visibility ──────────────────────────────── */
+    .page         { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+    .page.active  { display: flex; }
+
+    /* ── typography ───────────────────────────────────── */
+    .page-title { font-size: 16px; font-weight: 500; }
+    .page-sub   { font-size: 12px; color: var(--muted); margin-top: 2px; }
+
+    /* ── metric cards ─────────────────────────────────── */
+    .metric       { background: var(--bg); border-radius: 8px; padding: 14px 16px; }
+    .metric-label { font-size: 12px; color: var(--muted); margin-bottom: 6px;
+                    display: flex; align-items: center; gap: 5px; }
+    .metric-val   { font-size: 22px; font-weight: 500; line-height: 1.2; }
+    .metric-note  { font-size: 11px; color: var(--muted); margin-top: 4px; }
+    .metric-note.up   { color: var(--green); }
+    .metric-note.warn { color: #854F0B; }
+
+    /* ── cards ────────────────────────────────────────── */
+    .card       { background: var(--surface); border: 0.5px solid var(--border);
+                  border-radius: 10px; }
+    .card-head  { padding: 12px 16px; border-bottom: 0.5px solid var(--border);
+                  display: flex; align-items: center; justify-content: space-between; }
+    .card-title { font-size: 13px; font-weight: 500; }
+    .card-body  { padding: 14px 16px; }
+
+    /* ── badges ───────────────────────────────────────── */
+    .badge    { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px;
+                border-radius: 20px; font-size: 11px; font-weight: 500; white-space: nowrap; }
+    .dot      { width: 6px; height: 6px; border-radius: 50%;
+                background: currentColor; flex-shrink: 0; }
+    .b-green  { background: var(--green-bg);  color: var(--green); }
+    .b-amber  { background: var(--amber-bg);  color: var(--amber); }
+    .b-red    { background: var(--red-bg);    color: var(--red); }
+    .b-blue   { background: var(--blue-bg);   color: var(--blue); }
+    .b-purple { background: var(--purple-bg); color: var(--purple); }
+    .b-gray   { background: var(--gray-bg);   color: var(--gray); }
+
+    /* ── buttons ──────────────────────────────────────── */
+    .btn         { padding: 7px 14px; border-radius: 6px; border: 0.5px solid var(--border);
+                   background: var(--surface); color: var(--ink); font-size: 13px;
+                   cursor: pointer; display: inline-flex; align-items: center;
+                   gap: 6px; font-family: inherit; }
+    .btn:hover   { background: var(--bg); }
+    .btn-primary { background: var(--navy); color: #fff; border-color: var(--navy); }
+    .btn-primary:hover { background: var(--navy2); }
+    .btn-gold    { background: var(--gold); color: var(--navy);
+                   border-color: var(--gold); font-weight: 500; }
+    .btn-sm      { padding: 4px 10px; font-size: 12px; }
+    .btn-danger  { color: var(--red); border-color: #f5c6c6; background: var(--surface); }
+    .btn-danger:hover { background: var(--red-bg); }
+
+    /* ── tables ───────────────────────────────────────── */
+    table           { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th              { text-align: left; font-size: 11px; color: var(--muted);
+                      padding: 8px 12px; border-bottom: 0.5px solid var(--border);
+                      font-weight: 400; text-transform: uppercase; letter-spacing: .05em; }
+    td              { padding: 10px 12px; border-bottom: 0.5px solid var(--border);
+                      vertical-align: middle; }
+    tr:last-child td{ border-bottom: none; }
+    .tbl-row:hover td { background: var(--bg); cursor: pointer; }
+
+    /* ── forms ────────────────────────────────────────── */
+    .field         { display: flex; flex-direction: column; gap: 4px; }
+    .field label   { font-size: 11px; text-transform: uppercase; letter-spacing: .07em;
+                     color: var(--muted); }
+    .field input, .field select, .field textarea {
+      border: 0.5px solid var(--border); border-radius: 6px; padding: 8px 10px;
+      font-size: 13px; background: var(--surface); color: var(--ink);
+      outline: none; font-family: inherit; width: 100%; }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      border-color: var(--navy); }
+    .field textarea { resize: vertical; min-height: 72px; }
+    .form-grid     { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .field-full    { grid-column: 1 / -1; }
+    .form-actions  { display: flex; gap: 8px; justify-content: flex-end;
+                     margin-top: 16px; padding-top: 14px;
+                     border-top: 0.5px solid var(--border); }
+
+    /* ── search ───────────────────────────────────────── */
+    .search-wrap   { position: relative; flex: 1; min-width: 0; }
+    .search-wrap i { position: absolute; left: 10px; top: 50%;
+                     transform: translateY(-50%); color: var(--muted); font-size:16px; }
+    .search-wrap input { padding-left: 32px; }
+    .filter-row    { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .chip          { padding: 4px 12px; border-radius: 20px; font-size: 12px;
+                     cursor: pointer; border: 0.5px solid var(--border);
+                     background: var(--surface); color: var(--muted); }
+    .chip.on       { background: var(--navy); color: #fff; border-color: var(--navy); }
+
+    /* ── grids ────────────────────────────────────────── */
+    .grid-4 { display: grid; grid-template-columns: repeat(4,minmax(0,1fr)); gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+    .grid-2 { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 14px; }
+    .grid-2r{ display: grid; grid-template-columns: minmax(0,1.4fr) minmax(0,1fr); gap: 14px; }
+
+    /* ── misc ─────────────────────────────────────────── */
+    .tag    { display: inline-block; padding: 2px 7px; background: var(--bg);
+              border-radius: 4px; font-size: 11px; color: var(--muted); }
+    .divider{ height: 0.5px; background: var(--border); }
+    .empty  { text-align: center; padding: 40px; color: var(--muted); font-size: 13px; }
+    .loading{ text-align: center; padding: 40px; color: var(--muted); font-size: 13px; }
+    .kv-grid{ display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .kv label { font-size: 11px; color: var(--muted); display: block; margin-bottom: 2px; }
+    .kv span  { font-size: 13px; }
+    .section-label { font-size: 11px; text-transform: uppercase; letter-spacing: .07em;
+                     color: var(--muted); font-weight: 500; margin-bottom: 8px; display: block; }
+    .bar-row   { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+    .bar-label { width: 80px; text-align: right; color: var(--muted);
+                 flex-shrink: 0; font-size: 11px; }
+    .bar-track { flex: 1; height: 12px; background: var(--bg);
+                 border-radius: 3px; overflow: hidden; }
+    .bar-fill  { height: 100%; border-radius: 3px; }
+    .bar-val   { width: 48px; text-align: right; font-size: 11px; }
+
+    /* ── modal overlay ────────────────────────────────── */
+    .modal-backdrop { display: none; position: fixed; inset: 0;
+                      background: rgba(0,0,0,0.4); z-index: 100;
+                      align-items: flex-start; justify-content: center;
+                      padding-top: 60px; overflow-y: auto; }
+    .modal-backdrop.open { display: flex; }
+    .modal  { background: var(--surface); border-radius: 12px;
+              border: 0.5px solid var(--border); width: 560px; max-width: 95vw;
+              margin-bottom: 40px; }
+    .modal-head { padding: 14px 18px; border-bottom: 0.5px solid var(--border);
+                  display: flex; align-items: center; justify-content: space-between; }
+    .modal-title{ font-size: 15px; font-weight: 500; }
+    .modal-body { padding: 18px; }
+    .modal-close{ background: none; border: none; cursor: pointer;
+                  color: var(--muted); font-size: 20px; line-height: 1;
+                  display: flex; align-items: center; }
+
+    /* ── toast notification ───────────────────────────── */
+    #toast { position: fixed; bottom: 24px; right: 24px; z-index: 200;
+             display: flex; flex-direction: column; gap: 8px; }
+    .toast-item { padding: 10px 16px; border-radius: 8px; font-size: 13px;
+                  border: 0.5px solid var(--border); background: var(--surface);
+                  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+                  animation: slideIn .2s ease; }
+    .toast-item.success { background: var(--green-bg); color: var(--green); }
+    .toast-item.error   { background: var(--red-bg);   color: var(--red); }
+    @keyframes slideIn { from { opacity:0; transform:translateY(8px); }
+                         to   { opacity:1; transform:translateY(0); } }
+  </style>
+</head>
+<body>
+<div class="shell">
+
+  <!-- ── Sidebar ──────────────────────────────────────── -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">Loan System</div>
+      <div class="logo-name">LoanFlow</div>
+    </div>
+    <nav>
+      <div class="nav-section">
+        <span class="nav-label">Overview</span>
+        <a class="nav-item active" data-page="dashboard">
+          <i class="ti ti-layout-dashboard" aria-hidden="true"></i>Dashboard
+        </a>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Management</span>
+        <a class="nav-item" data-page="applications">
+          <i class="ti ti-file-description" aria-hidden="true"></i>Applications
+        </a>
+        <a class="nav-item" data-page="customers">
+          <i class="ti ti-users" aria-hidden="true"></i>Customers
+        </a>
+        <a class="nav-item" data-page="underwriting">
+          <i class="ti ti-clipboard-check" aria-hidden="true"></i>Underwriting
+        </a>
+        <a class="nav-item" data-page="loans">
+          <i class="ti ti-cash" aria-hidden="true"></i>Loans
+        </a>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">System</span>
+        <a class="nav-item" data-page="trash">
+          <i class="ti ti-trash" aria-hidden="true"></i>Trash
+        </a>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ── Main area ─────────────────────────────────────── -->
+  <div class="main">
+
+    <!-- Page: Dashboard -->
+    <div id="page-dashboard" class="page active">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Dashboard</div>
+          <div class="page-sub">ภาพรวมการดำเนินงาน</div>
+        </div>
+      </div>
+      <div class="content" id="dashboard-content">
+        <div class="loading">
+          <i class="ti ti-loader" style="font-size:20px"></i> กำลังโหลด...
+        </div>
+      </div>
+    </div>
+
+    <!-- Page: Applications -->
+    <div id="page-applications" class="page">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Applications</div>
+          <div class="page-sub">จัดการใบขอสินเชื่อ</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-app-add')">
+          <i class="ti ti-plus" aria-hidden="true"></i> New application
+        </button>
+      </div>
+      <div class="content" id="applications-content">
+        <div class="loading">กำลังโหลด...</div>
+      </div>
+    </div>
+
+    <!-- Page: Customers -->
+    <div id="page-customers" class="page">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Customers</div>
+          <div class="page-sub">ข้อมูลลูกค้า</div>
+        </div>
+        <button class="btn btn-primary btn-sm" onclick="openModal('modal-customer-add')">
+          <i class="ti ti-plus" aria-hidden="true"></i> New customer
+        </button>
+      </div>
+      <div class="content" id="customers-content">
+        <div class="loading">กำลังโหลด...</div>
+      </div>
+    </div>
+
+    <!-- Page: Underwriting -->
+    <div id="page-underwriting" class="page">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Underwriting</div>
+          <div class="page-sub">การประเมินและตัดสินใจสินเชื่อ</div>
+        </div>
+      </div>
+      <div class="content" id="underwriting-content">
+        <div class="loading">กำลังโหลด...</div>
+      </div>
+    </div>
+
+    <!-- Page: Loans -->
+    <div id="page-loans" class="page">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Loans</div>
+          <div class="page-sub">สัญญาสินเชื่อที่อนุมัติแล้ว</div>
+        </div>
+      </div>
+      <div class="content" id="loans-content">
+        <div class="loading">กำลังโหลด...</div>
+      </div>
+    </div>
+
+    <!-- Page: Trash -->
+    <div id="page-trash" class="page">
+      <div class="topbar">
+        <div>
+          <div class="page-title">Trash</div>
+          <div class="page-sub">รายการที่ถูกลบ — กู้คืนหรือลบถาวร</div>
+        </div>
+      </div>
+      <div class="content" id="trash-content">
+        <div class="loading">กำลังโหลด...</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ── Toast container ──────────────────────────────────── -->
+<div id="toast"></div>
+<!-- ── Modals: Applications ──────────────────────────────────── -->
+
+<!-- Modal: New Application -->
+<div id="modal-app-add" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">New application</span>
+      <button class="modal-close" onclick="closeModal('modal-app-add')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid">
+
+        <!-- เลือกลูกค้าโดยพิมพ์ customer_id -->
+        <div class="field field-full">
+        <label>Customer ID</label>
+        <div style="display:flex;gap:8px;align-items:flex-end">
+            <div style="flex:1">
+            <input type="number" id="app-customer-id"
+                placeholder="เช่น 1, 2, 3..."
+                min="1"
+                oninput="lookupCustomer(this.value)">
+            </div>
+            <!-- แสดงชื่อลูกค้าที่ค้นพบ -->
+            <div id="customer-lookup-result"
+            style="font-size:12px;color:var(--muted);
+                    padding:8px 0;min-width:160px;white-space:nowrap;
+                    overflow:hidden;text-overflow:ellipsis">
+            —
+            </div>
+        </div>
+        </div>
+
+        <!-- applicant type — แก้ layout ไม่ให้ทับ -->
+        <div class="field field-full">
+        <label>Applicant type</label>
+        <div style="display:flex;gap:24px;margin-top:6px">
+            <label style="display:flex;align-items:center;gap:8px;
+            font-size:13px;font-weight:400;text-transform:none;
+            letter-spacing:0;cursor:pointer;color:var(--ink)">
+            <input type="radio" name="app-applicant-type"
+                value="Salaried" checked
+                style="width:16px;height:16px;flex-shrink:0;cursor:pointer">
+            <span>Salaried (พนักงานประจำ)</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:8px;
+            font-size:13px;font-weight:400;text-transform:none;
+            letter-spacing:0;cursor:pointer;color:var(--ink)">
+            <input type="radio" name="app-applicant-type"
+                value="Business"
+                style="width:16px;height:16px;flex-shrink:0;cursor:pointer">
+            <span>Business (ผู้ประกอบการ)</span>
+            </label>
+        </div>
+        </div>
+
+        <!-- สาขา -->
+        <div class="field">
+          <label>Branch</label>
+          <select id="app-branch-id">
+            <option value="">-- เลือกสาขา --</option>
+          </select>
+        </div>
+
+        <!-- requested amount -->
+        <div class="field">
+          <label>Requested amount (฿)</label>
+          <input type="number" id="app-amount"
+            placeholder="เช่น 2800000" min="0" step="1000">
+        </div>
+
+        <!-- tenure months -->
+        <div class="field">
+          <label>Tenure (months)</label>
+          <input type="number" id="app-tenure"
+            placeholder="เช่น 240" min="1" max="360">
+        </div>
+
+        <!-- application date -->
+        <div class="field">
+          <label>Application date</label>
+          <input type="date" id="app-date">
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button class="btn" onclick="closeModal('modal-app-add')">
+          Cancel
+        </button>
+        <button class="btn btn-primary" onclick="submitNewApplication()">
+          <i class="ti ti-plus" aria-hidden="true"></i> Create application
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Edit Application -->
+<div id="modal-app-edit" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Edit application</span>
+      <button class="modal-close" onclick="closeModal('modal-app-edit')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="edit-app-id">
+      <div class="form-grid">
+
+        <div class="field">
+          <label>Requested amount (฿)</label>
+          <input type="number" id="edit-app-amount" min="0" step="1000">
+        </div>
+
+        <div class="field">
+          <label>Tenure (months)</label>
+          <input type="number" id="edit-app-tenure" min="1" max="360">
+        </div>
+
+        <div class="field">
+          <label>Branch</label>
+          <select id="edit-app-branch"></select>
+        </div>
+
+        <div class="field">
+          <label>Application status</label>
+          <select id="edit-app-status">
+            <option value="Pending">Pending</option>
+            <option value="Processing">Processing</option>
+            <option value="Underwriting">Underwriting</option>
+            <option value="Approved">Approved</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Suspended">Suspended</option>
+          </select>
+        </div>
+
+      </div>
+      <div class="form-actions">
+        <button class="btn" onclick="closeModal('modal-app-edit')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitEditApplication()">
+          <i class="ti ti-check" aria-hidden="true"></i> Save changes
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Add Document -->
+<div id="modal-doc-add" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-head">
+      <span class="modal-title">Add document</span>
+      <button class="modal-close" onclick="closeModal('modal-doc-add')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="doc-app-id">
+      <input type="hidden" id="doc-applicant-type">
+      <div class="form-grid">
+
+        <div class="field field-full">
+          <label>Document type</label>
+          <!-- options จะถูก populate ตาม applicant_type -->
+          <select id="doc-type"></select>
+        </div>
+
+        <div class="field field-full">
+          <label>File (PDF, JPG, PNG)</label>
+          <input type="file" id="doc-file"
+            accept=".pdf,.jpg,.jpeg,.png"
+            style="padding:6px 10px">
+        </div>
+
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        ไฟล์จะถูกอัปโหลดไปยัง Supabase Storage
+        และบันทึก path ลงในตาราง document
+      </div>
+      <div class="form-actions">
+        <button class="btn" onclick="closeModal('modal-doc-add')">Cancel</button>
+        <button class="btn btn-primary" onclick="submitAddDocument()">
+          <i class="ti ti-upload" aria-hidden="true"></i> Upload document
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Confirm Delete Application -->
+<div id="modal-app-delete" class="modal-backdrop">
+  <div class="modal" style="width:400px">
+    <div class="modal-head">
+      <span class="modal-title">Move to trash?</span>
+      <button class="modal-close" onclick="closeModal('modal-app-delete')">
+        <i class="ti ti-x" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--muted);line-height:1.6">
+        Application <strong id="delete-app-label"></strong>
+        จะถูกย้ายไปยัง Trash<br>
+        สามารถกู้คืนได้ภายหลังจากหน้า Trash
+      </p>
+      <div class="form-actions">
+        <button class="btn" onclick="closeModal('modal-app-delete')">
+          Cancel
+        </button>
+        <button class="btn btn-danger" onclick="confirmDeleteApplication()">
+          <i class="ti ti-trash" aria-hidden="true"></i> Move to trash
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================================================================
+// CONFIG — ใส่ค่าจาก Supabase project ของคุณตรงนี้
+// ================================================================
+const SUPABASE_URL      = 'https://nvkieweagnsszrcfdfws.supabase.co'
+const SUPABASE_ANON_KEY = 'sb_publishable_Ps_ywoWGQV5PC0ACi1pPBA_OrQsMKT-'
+
+// สร้าง Supabase client จาก CDN global `supabase`
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+// ================================================================
+// HELPERS
+// ================================================================
+
+// ดึงข้อมูลพร้อม error handling — คืน data หรือ null
+async function query(fn) {
+  const { data, error } = await fn(db)
+  if (error) { console.error('[DB]', error.message); return null }
+  return data
+}
+
+// format ตัวเลขเป็นสกุลเงินบาท เช่น 2800000 → "฿2,800,000"
+function formatBaht(n) {
+  if (n == null) return '—'
+  return '฿' + Number(n).toLocaleString('th-TH', { maximumFractionDigits: 0 })
+}
+
+// format วันที่ เช่น "2026-03-10" → "10 มี.ค. 2569"
+function formatDate(d) {
+  if (!d) return '—'
+  return new Date(d).toLocaleDateString('th-TH', {
+    day: 'numeric', month: 'short', year: 'numeric'
+  })
+}
+
+// สร้าง badge HTML ตาม status string
+function statusBadge(status) {
+  const map = {
+    'Pending':              'b-amber',
+    'Processing':           'b-blue',
+    'Underwriting':         'b-purple',
+    'Approved':             'b-green',
+    'Rejected':             'b-red',
+    'Suspended':            'b-gray',
+    'Clear to Close':       'b-green',
+    'Conditional Approval': 'b-blue',
+    'Denied':               'b-red',
+    'Active':               'b-green',
+    'Closed':               'b-gray',
+    'Defaulted':            'b-red',
+    'Verified':             'b-green',
+    'Low':                  'b-green',
+    'Medium':               'b-amber',
+    'High':                 'b-red',
+  }
+  const cls = map[status] ?? 'b-gray'
+  return `<span class="badge ${cls}"><span class="dot"></span>${status ?? '—'}</span>`
+}
+
+// แสดง toast notification ที่มุมขวาล่าง
+// type: 'success' | 'error' | '' (default = neutral)
+function toast(msg, type = '') {
+  const el = document.createElement('div')
+  el.className = `toast-item ${type}`
+  el.textContent = msg
+  document.getElementById('toast').appendChild(el)
+  setTimeout(() => el.remove(), 3000)
+}
+
+// ================================================================
+// ROUTER — สลับหน้าด้วย showPage('dashboard')
+// ================================================================
+const pageLoaders = {}   // เก็บ load function ของแต่ละหน้า
+let currentPage = ''
+
+function showPage(name) {
+  // ซ่อนทุก page
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+  // แสดง page ที่เลือก
+  const page = document.getElementById('page-' + name)
+  if (page) page.classList.add('active')
+
+  // อัปเดต nav highlight
+  document.querySelectorAll('.nav-item').forEach(a => {
+    a.classList.toggle('active', a.dataset.page === name)
+  })
+
+  // โหลดข้อมูลถ้ายังไม่เคยโหลด หรือ reload ทุกครั้ง
+  if (pageLoaders[name]) pageLoaders[name]()
+  currentPage = name
+}
+
+// ผูก click กับ nav items
+document.querySelectorAll('.nav-item[data-page]').forEach(a => {
+  a.addEventListener('click', () => showPage(a.dataset.page))
+})
+
+// ================================================================
+// MODAL HELPERS
+// ================================================================
+function openModal(id) {
+  document.getElementById(id)?.classList.add('open')
+}
+function closeModal(id) {
+  document.getElementById(id)?.classList.remove('open')
+}
+// กด backdrop ปิด modal
+document.addEventListener('click', e => {
+  if (e.target.classList.contains('modal-backdrop')) {
+    e.target.classList.remove('open')
+  }
+})
+
+// ================================================================
+// PAGE LOADERS — จะเพิ่ม logic ของแต่ละหน้าลงมาที่นี่
+// ================================================================
+
+// -- Dashboard --
+// ================================================================
+// PAGE: DASHBOARD
+// ================================================================
+// ================================================================
+// PAGE: DASHBOARD
+// ================================================================
+pageLoaders['dashboard'] = async function () {
+
+  // ── ดึงข้อมูลทั้งหมดพร้อมกัน ──────────────────────────────────
+  const [apps, loans, underwritings, customers] = await Promise.all([
+
+    // loan_application — ดึงทุก row ที่ไม่ถูก soft delete
+    query(d => d.from('loan_application')
+      .select('application_id, application_status, application_date, applicant_type')
+      .eq('is_deleted', false)),
+
+    // loan — ดึงเพื่อคำนวณ disbursement เดือนนี้
+    query(d => d.from('loan')
+      .select('approved_amount, disbursement_date')
+      .eq('is_deleted', false)),
+
+    // underwriting — ดึงเพื่อคำนวณ DTI stats
+    query(d => d.from('underwriting')
+      .select('dti_ratio, decision, risk_rating')),
+
+    // customer — นับจำนวนทั้งหมด
+    query(d => d.from('customer')
+      .select('customer_id')),
+  ])
+
+  // ── คำนวณ: disbursement เดือนนี้ ─────────────────────────────
+  const now       = new Date()
+  const thisMonth = now.getMonth()
+  const thisYear  = now.getFullYear()
+
+  const disbThisMonth = (loans ?? [])
+    .filter(l => {
+      if (!l.disbursement_date) return false
+      const d = new Date(l.disbursement_date)
+      return d.getMonth() === thisMonth && d.getFullYear() === thisYear
+    })
+    .reduce((sum, l) => sum + Number(l.approved_amount), 0)
+
+  // ── คำนวณ: approval rate ──────────────────────────────────────
+  const totalApps    = (apps ?? []).length
+  const approvedApps = (apps ?? [])
+    .filter(a => a.application_status === 'Approved').length
+  const approvalRate = totalApps > 0
+    ? ((approvedApps / totalApps) * 100).toFixed(1) : '0.0'
+
+  // ── คำนวณ: applications เดือนนี้ ─────────────────────────────
+  const appsThisMonth = (apps ?? []).filter(a => {
+    const d = new Date(a.application_date)
+    return d.getMonth() === thisMonth && d.getFullYear() === thisYear
+  })
+  const approvedThisMonth = appsThisMonth
+    .filter(a => a.application_status === 'Approved').length
+  const rejectedThisMonth = appsThisMonth
+    .filter(a => a.application_status === 'Rejected').length
+
+  // ── คำนวณ: status breakdown ───────────────────────────────────
+  const STATUSES = ['Approved','Pending','Processing',
+                    'Underwriting','Rejected','Suspended']
+  const statusCount = {}
+  STATUSES.forEach(s => {
+    statusCount[s] = (apps ?? [])
+      .filter(a => a.application_status === s).length
+  })
+
+  // ── คำนวณ: demographics ───────────────────────────────────────
+  const salCount = (apps ?? [])
+    .filter(a => a.applicant_type === 'Salaried').length
+  const bizCount = (apps ?? [])
+    .filter(a => a.applicant_type === 'Business').length
+  const salPct   = totalApps > 0
+    ? Math.round(salCount / totalApps * 100) : 0
+  const bizPct   = 100 - salPct
+
+  // ── คำนวณ: approval rate ย้อนหลัง 3 เดือน ────────────────────
+  // สร้าง array ของ 3 เดือนล่าสุด เช่น [{month:4,year:2026}, ...]
+  const months3 = [2, 1, 0].map(offset => {
+    const d = new Date(thisYear, thisMonth - offset, 1)
+    return {
+      month: d.getMonth(),
+      year:  d.getFullYear(),
+      label: d.toLocaleDateString('th-TH', { month: 'short', year: 'numeric' })
+    }
+  })
+  // คำนวณ approval rate แต่ละเดือน
+  const trendData = months3.map(m => {
+    const monthApps = (apps ?? []).filter(a => {
+      const d = new Date(a.application_date)
+      return d.getMonth() === m.month && d.getFullYear() === m.year
+    })
+    const approved = monthApps.filter(a => a.application_status === 'Approved').length
+    const rate = monthApps.length > 0
+      ? ((approved / monthApps.length) * 100).toFixed(1) : '0.0'
+    return { ...m, total: monthApps.length, approved, rate: Number(rate) }
+  })
+  const maxRate = Math.max(...trendData.map(t => t.rate), 1)
+
+  // ── คำนวณ: DTI stats ──────────────────────────────────────────
+  const dtiValues = (underwritings ?? [])
+    .map(u => Number(u.dti_ratio))
+    .filter(v => !isNaN(v) && v > 0)
+  const avgDti  = dtiValues.length
+    ? (dtiValues.reduce((s, v) => s + v, 0) / dtiValues.length).toFixed(1) : '—'
+  const maxDti  = dtiValues.length
+    ? Math.max(...dtiValues).toFixed(1) : '—'
+  const lowDti  = dtiValues.filter(v => v <  36).length
+  const midDti  = dtiValues.filter(v => v >= 36 && v <= 43).length
+  const highDti = dtiValues.filter(v => v >  43).length
+  const dtiTotal = dtiValues.length || 1
+  const lowPct  = Math.round(lowDti  / dtiTotal * 100)
+  const midPct  = Math.round(midDti  / dtiTotal * 100)
+  const highPct = 100 - lowPct - midPct
+
+  // ── ดึง recent 5 applications พร้อม customer name ─────────────
+  const recentApps = await query(d =>
+    d.from('loan_application')
+      .select(`
+        application_id,
+        application_status,
+        applicant_type,
+        application_date,
+        customer:customer_id ( customer_name )
+      `)
+      .eq('is_deleted', false)
+      .order('application_date', { ascending: false })
+      .limit(5))
+
+  // ── segmented bar colors ──────────────────────────────────────
+  const segColors = {
+    Approved:     '#639922',
+    Pending:      '#BA7517',
+    Processing:   '#378ADD',
+    Underwriting: '#7F77DD',
+    Rejected:     '#E24B4A',
+    Suspended:    '#888780',
+  }
+  const segHTML = Object.entries(segColors).map(([s, c]) =>
+    `<div style="flex:${statusCount[s] || 0};background:${c};height:100%;
+      min-width:${statusCount[s] ? 2 : 0}px"
+      title="${s}: ${statusCount[s] ?? 0}">
+    </div>`
+  ).join('')
+
+  // ── donut SVG (circumference r=28 ≈ 175.9) ───────────────────
+  const C      = 175.9
+  const salArc = ((salPct / 100) * C).toFixed(1)
+  const bizArc = (C - Number(salArc)).toFixed(1)
+
+  // ── render ────────────────────────────────────────────────────
+  document.getElementById('dashboard-content').innerHTML = `
+
+    <!-- stat cards -->
+    <div class="grid-4">
+      <div class="metric">
+        <div class="metric-label">
+          <i class="ti ti-cash" style="font-size:15px" aria-hidden="true"></i>
+          Total disbursement
+        </div>
+        <div class="metric-val">${formatBaht(disbThisMonth)}</div>
+        <div class="metric-note">เดือนนี้</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">
+          <i class="ti ti-users" style="font-size:15px" aria-hidden="true"></i>
+          Total customers
+        </div>
+        <div class="metric-val">${(customers ?? []).length.toLocaleString()}</div>
+        <div class="metric-note">ลูกค้าทั้งหมดในระบบ</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">
+          <i class="ti ti-chart-pie" style="font-size:15px" aria-hidden="true"></i>
+          Approval rate
+        </div>
+        <div class="metric-val">${approvalRate}%</div>
+        <div class="metric-note">
+          อนุมัติ ${approvedApps} จาก ${totalApps} รายการ
+        </div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">
+          <i class="ti ti-file-description" style="font-size:15px" aria-hidden="true"></i>
+          Applications this month
+        </div>
+        <div class="metric-val">${appsThisMonth.length}</div>
+        <div class="metric-note">
+          อนุมัติ ${approvedThisMonth} · ปฏิเสธ ${rejectedThisMonth}
+        </div>
+      </div>
+    </div>
+
+    <!-- row 2 -->
+    <div class="grid-2r">
+
+      <!-- status overview -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Loan application status overview</span>
+          <span class="tag">ทั้งหมด ${totalApps} รายการ</span>
+        </div>
+        <div class="card-body" style="display:flex;flex-direction:column;gap:14px">
+
+          <!-- segmented bar -->
+          <div style="display:flex;height:10px;border-radius:5px;
+            overflow:hidden;gap:1px">
+            ${totalApps === 0
+              ? `<div style="flex:1;background:var(--bg);height:100%;border-radius:5px"></div>`
+              : segHTML}
+          </div>
+
+          <!-- legend -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">
+            ${Object.entries(segColors).map(([s, c]) => `
+              <div style="display:flex;align-items:center;gap:6px;font-size:12px">
+                <div style="width:8px;height:8px;border-radius:50%;
+                  background:${c};flex-shrink:0"></div>
+                <span style="color:var(--muted);flex:1">${s}</span>
+                <span style="font-weight:500">${statusCount[s] ?? 0}</span>
+              </div>`).join('')}
+          </div>
+
+          <!-- approval rate trend แทน loan type breakdown -->
+          <div style="border-top:0.5px solid var(--border);padding-top:12px">
+            <span class="section-label">Approval rate ย้อนหลัง 3 เดือน</span>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              ${trendData.map(m => `
+                <div class="bar-row">
+                  <div class="bar-label" style="font-size:11px">${m.label}</div>
+                  <div class="bar-track">
+                    <div class="bar-fill"
+                      style="width:${Math.round(m.rate / maxRate * 100)}%;
+                             background:${m.rate >= 70 ? '#639922'
+                               : m.rate >= 50 ? '#BA7517' : '#E24B4A'}">
+                    </div>
+                  </div>
+                  <div class="bar-val">${m.rate}%</div>
+                </div>
+                <div style="font-size:11px;color:var(--muted);
+                  text-align:right;margin-top:-4px">
+                  ${m.approved}/${m.total} รายการ
+                </div>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- right column -->
+      <div style="display:flex;flex-direction:column;gap:14px">
+
+        <!-- demographics -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">Customer demographics</span>
+          </div>
+          <div class="card-body">
+            <div style="display:flex;align-items:center;gap:16px">
+              <svg width="80" height="80" viewBox="0 0 80 80" aria-hidden="true">
+                <circle cx="40" cy="40" r="28" fill="none"
+                  stroke="var(--bg)" stroke-width="14"/>
+                <circle cx="40" cy="40" r="28" fill="none"
+                  stroke="#185FA5" stroke-width="14"
+                  stroke-dasharray="${salArc} ${bizArc}"
+                  stroke-dashoffset="0"
+                  transform="rotate(-90 40 40)"/>
+                <circle cx="40" cy="40" r="28" fill="none"
+                  stroke="#534AB7" stroke-width="14"
+                  stroke-dasharray="${bizArc} ${salArc}"
+                  stroke-dashoffset="-${salArc}"
+                  transform="rotate(-90 40 40)"/>
+              </svg>
+              <div style="display:flex;flex-direction:column;gap:10px;flex:1">
+                <div style="display:flex;align-items:center;
+                  justify-content:space-between;font-size:12px">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div style="width:8px;height:8px;border-radius:50%;
+                      background:#185FA5"></div>
+                    <span style="color:var(--muted)">Salaried</span>
+                  </div>
+                  <span style="font-weight:500">${salPct}% (${salCount})</span>
+                </div>
+                <div style="display:flex;align-items:center;
+                  justify-content:space-between;font-size:12px">
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <div style="width:8px;height:8px;border-radius:50%;
+                      background:#534AB7"></div>
+                    <span style="color:var(--muted)">Business</span>
+                  </div>
+                  <span style="font-weight:500">${bizPct}% (${bizCount})</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- DTI monitoring -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">DTI ratio monitoring</span>
+            <span class="badge b-blue">เฉลี่ย ${avgDti}%</span>
+          </div>
+          <div class="card-body"
+            style="display:flex;flex-direction:column;gap:10px">
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+              <div style="background:var(--bg);border-radius:6px;
+                padding:10px 12px">
+                <div style="font-size:11px;color:var(--muted);margin-bottom:2px">
+                  Average DTI
+                </div>
+                <div style="font-size:18px;font-weight:500;color:var(--green)">
+                  ${avgDti}%
+                </div>
+              </div>
+              <div style="background:var(--bg);border-radius:6px;
+                padding:10px 12px">
+                <div style="font-size:11px;color:var(--muted);margin-bottom:2px">
+                  Max DTI
+                </div>
+                <div style="font-size:18px;font-weight:500;color:var(--red)">
+                  ${maxDti}%
+                </div>
+              </div>
+            </div>
+            <div style="display:flex;height:6px;border-radius:3px;
+              overflow:hidden;gap:1px">
+              <div style="flex:${lowPct};background:#639922"
+                title="Low: ${lowPct}%"></div>
+              <div style="flex:${midPct};background:#BA7517"
+                title="Medium: ${midPct}%"></div>
+              <div style="flex:${highPct};background:#E24B4A"
+                title="High: ${highPct}%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;
+              font-size:11px">
+              <span style="color:var(--green)">Low &lt;36% · ${lowPct}%</span>
+              <span style="color:#854F0B">Medium · ${midPct}%</span>
+              <span style="color:var(--red)">High &gt;43% · ${highPct}%</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- row 3: recent applications -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Recent applications</span>
+        <button class="btn btn-sm" onclick="showPage('applications')">
+          ดูทั้งหมด
+          <i class="ti ti-arrow-right" aria-hidden="true"></i>
+        </button>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style="width:90px">ID</th>
+            <th>ชื่อลูกค้า</th>
+            <th>Applicant type</th>
+            <th>วันที่ยื่น</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${!(recentApps ?? []).length
+            ? `<tr><td colspan="5" class="empty">ไม่มีข้อมูล</td></tr>`
+            : (recentApps ?? []).map(a => `
+                <tr class="tbl-row" onclick="showPage('applications')">
+                  <td>
+                    <span class="tag">
+                      APP-${String(a.application_id).padStart(4,'0')}
+                    </span>
+                  </td>
+                  <td>${a.customer?.customer_name ?? '—'}</td>
+                  <td>${statusBadge(a.applicant_type)}</td>
+                  <td>${formatDate(a.application_date)}</td>
+                  <td>${statusBadge(a.application_status)}</td>
+                </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+  `
+}
+
+// -- Applications --
+// ================================================================
+// PAGE: APPLICATIONS
+// ================================================================
+
+// state ของหน้านี้ — เก็บไว้นอก loader เพื่อให้ฟังก์ชันอื่นเข้าถึงได้
+let allApplications  = []   // ข้อมูลทั้งหมดที่ดึงมา
+let currentAppFilter = 'All' // filter ที่เลือกอยู่
+let selectedAppId    = null  // application ที่กำลังดูอยู่
+
+pageLoaders['applications'] = async function () {
+
+  // render layout หลักก่อน แล้วค่อย inject ข้อมูล
+  document.getElementById('applications-content').innerHTML = `
+    <div class="grid-2r" style="align-items:start">
+
+      <!-- ── ซ้าย: list ──────────────────────────────────────── -->
+      <div style="display:flex;flex-direction:column;gap:10px">
+
+        <!-- search + filter -->
+        <div class="filter-row">
+          <div class="search-wrap">
+            <i class="ti ti-search" aria-hidden="true"></i>
+            <input id="app-search" placeholder="ค้นหาชื่อลูกค้า, APP-ID..."
+              oninput="filterApplications()">
+          </div>
+        </div>
+        <div class="filter-row" id="app-filter-chips">
+          ${['All','Pending','Processing','Underwriting',
+             'Approved','Rejected','Suspended']
+            .map(s => `
+              <div class="chip ${s === 'All' ? 'on' : ''}"
+                onclick="setAppFilter('${s}')">
+                ${s}
+              </div>`).join('')}
+        </div>
+
+        <!-- table -->
+        <div class="card">
+          <div class="card-head">
+            <span class="card-title">All applications</span>
+            <span class="tag" id="app-count-label">โหลด...</span>
+          </div>
+          <div id="app-table-wrap">
+            <div class="loading">กำลังโหลด...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ขวา: detail panel ────────────────────────────────── -->
+      <div id="app-detail-panel">
+        <div class="card">
+          <div class="card-body">
+            <div class="empty" style="color:var(--muted)">
+              <i class="ti ti-hand-click"
+                style="font-size:24px;display:block;margin-bottom:8px"
+                aria-hidden="true"></i>
+              เลือก application เพื่อดูรายละเอียด
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  `
+
+  // โหลด dropdown branches + customers สำหรับ modal
+  await loadBranchOptions()
+  await loadCustomerOptions()
+
+  // ดึงข้อมูล applications ทั้งหมด พร้อม customer name
+  allApplications = await query(d =>
+    d.from('loan_application')
+      .select(`
+        application_id,
+        application_status,
+        application_date,
+        applicant_type,
+        requested_amount,
+        requested_tenure_months,
+        branch_id,
+        is_deleted,
+        customer:customer_id (
+          customer_id,
+          customer_name,
+          customer_address,
+          customer_birthday,
+          customer_ac_no
+        )
+      `)
+      .eq('is_deleted', false)
+      .order('application_date', { ascending: false })
+  ) ?? []
+
+  renderAppTable()
+}
+
+// ── render ตาราง applications ────────────────────────────────────
+function renderAppTable() {
+  const search = document.getElementById('app-search')?.value.toLowerCase() ?? ''
+
+  // กรองตาม filter chip และ search
+  const filtered = allApplications.filter(a => {
+    const matchFilter = currentAppFilter === 'All'
+      || a.application_status === currentAppFilter
+    const name = a.customer?.customer_name?.toLowerCase() ?? ''
+    const id   = `app-${String(a.application_id).padStart(4,'0')}`
+    const matchSearch = !search
+      || name.includes(search)
+      || id.includes(search)
+    return matchFilter && matchSearch
+  })
+
+  // อัปเดต count label
+  document.getElementById('app-count-label').textContent =
+    `${filtered.length} รายการ`
+
+  // render table
+  document.getElementById('app-table-wrap').innerHTML =
+    filtered.length === 0
+    ? `<div class="empty">ไม่พบข้อมูล</div>`
+    : `<table>
+        <thead>
+          <tr>
+            <th style="width:90px">ID</th>
+            <th>ชื่อลูกค้า</th>
+            <th>Type</th>
+            <th>วันที่ยื่น</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${filtered.map(a => `
+            <tr class="tbl-row ${selectedAppId === a.application_id
+                ? 'selected-row' : ''}"
+              onclick="selectApplication(${a.application_id})"
+              style="${selectedAppId === a.application_id
+                ? 'background:var(--blue-bg)' : ''}">
+              <td>
+                <span class="tag">
+                  APP-${String(a.application_id).padStart(4,'0')}
+                </span>
+              </td>
+              <td>${a.customer?.customer_name ?? '—'}</td>
+              <td>
+                <span style="font-size:12px;color:var(--muted)">
+                  ${a.applicant_type ?? '—'}
+                </span>
+              </td>
+              <td>${formatDate(a.application_date)}</td>
+              <td>${statusBadge(a.application_status)}</td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`
+}
+
+// ── เปลี่ยน filter chip ──────────────────────────────────────────
+function setAppFilter(status) {
+  currentAppFilter = status
+  // อัปเดต chip style
+  document.querySelectorAll('#app-filter-chips .chip').forEach(c => {
+    c.classList.toggle('on', c.textContent.trim() === status)
+  })
+  renderAppTable()
+}
+
+// ── search handler ────────────────────────────────────────────────
+function filterApplications() {
+  renderAppTable()
+}
+
+// ── กดเลือก application → แสดง detail panel ─────────────────────
+async function selectApplication(appId) {
+  selectedAppId = appId
+  renderAppTable() // refresh highlight
+
+  // แสดง loading ใน detail panel
+  document.getElementById('app-detail-panel').innerHTML =
+    `<div class="card"><div class="loading">กำลังโหลด...</div></div>`
+
+  // หา application จาก allApplications (ไม่ต้อง query ใหม่)
+  const app = allApplications.find(a => a.application_id === appId)
+  if (!app) return
+
+  // ดึง documents ของ application นี้
+  const docs = await query(d =>
+    d.from('document')
+      .select('document_id, document_type, file_name, file_path,' +
+              'mime_type, verification_status, uploaded_at')
+      .eq('application_id', appId)
+      .eq('is_deleted', false)
+      .order('uploaded_at', { ascending: true })
+  ) ?? []
+
+  // ── คำนวณ progress stage ──────────────────────────────────────
+  // stage: submitted → docs_uploaded → underwriting → done
+  const hasDoc  = docs.length > 0
+  const allVerified = docs.length > 0
+    && docs.every(d => d.verification_status === 'Verified')
+  const isDone  = ['Approved','Rejected'].includes(app.application_status)
+  const isUnder = app.application_status === 'Underwriting'
+
+  // progress steps
+  const steps = [
+    { label: 'Application submitted', done: true,
+      sub: formatDate(app.application_date) },
+    { label: 'Documents uploaded',
+      done: hasDoc,
+      active: !hasDoc,
+      sub: hasDoc
+        ? `${docs.filter(d=>d.verification_status==='Verified').length
+           }/${docs.length} verified`
+        : 'รอเอกสาร' },
+    { label: 'Underwriting review',
+      done: isDone,
+      active: isUnder || allVerified,
+      sub: isUnder ? 'กำลังประเมิน' : isDone ? 'เสร็จสิ้น' : 'รอดำเนินการ' },
+    { label: 'Final decision',
+      done: isDone,
+      active: false,
+      sub: isDone ? app.application_status : 'รอผล' }
+  ]
+
+  const stepsHTML = steps.map((s, i) => `
+    <div style="display:flex;gap:12px;padding:6px 0">
+      <div style="display:flex;flex-direction:column;
+        align-items:center;width:18px;flex-shrink:0">
+        <div style="width:10px;height:10px;border-radius:50%;flex-shrink:0;
+          background:${s.done ? '#639922'
+            : s.active ? '#185FA5' : 'var(--bg)'};
+          border:1.5px solid ${s.done ? '#639922'
+            : s.active ? '#185FA5' : 'var(--border)'}">
+        </div>
+        ${i < steps.length - 1
+          ? `<div style="flex:1;width:1px;background:var(--border);
+              margin:2px 0;min-height:16px"></div>` : ''}
+      </div>
+      <div style="flex:1;padding-bottom:4px">
+        <div style="font-size:13px;font-weight:${s.active||s.done?'500':'400'};
+          color:${s.done ? 'var(--ink)'
+            : s.active ? '#185FA5' : 'var(--muted)'}">
+          ${s.label}
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:1px">
+          ${s.sub}
+        </div>
+      </div>
+    </div>`).join('')
+
+  // ── document list ─────────────────────────────────────────────
+  const docIcons = {
+    'application/pdf': 'ti-file-type-pdf',
+    'image/jpeg':      'ti-photo',
+    'image/png':       'ti-photo',
+  }
+  const docsHTML = docs.length === 0
+    ? `<div style="font-size:12px;color:var(--muted);
+        padding:8px 0">ยังไม่มีเอกสาร</div>`
+    : docs.map(doc => `
+        <div style="display:flex;align-items:center;gap:10px;
+          padding:8px 0;border-bottom:0.5px solid var(--border)">
+          <div style="width:32px;height:32px;border-radius:6px;
+            background:var(--bg);display:flex;align-items:center;
+            justify-content:center;flex-shrink:0">
+            <i class="ti ${docIcons[doc.mime_type] ?? 'ti-file'}"
+              style="font-size:16px;color:var(--muted)"
+              aria-hidden="true"></i>
+          </div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:500;
+              white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+              ${doc.file_name}
+            </div>
+            <div style="font-size:11px;color:var(--muted)">
+              ${doc.document_type} · ${formatDate(doc.uploaded_at)}
+            </div>
+          </div>
+          ${statusBadge(doc.verification_status)}
+        </div>`).join('')
+
+  // ── render detail panel ───────────────────────────────────────
+  document.getElementById('app-detail-panel').innerHTML = `
+    <div style="display:flex;flex-direction:column;gap:12px">
+
+      <!-- header -->
+      <div class="card">
+        <div class="card-head">
+          <div>
+            <div style="display:flex;align-items:center;gap:8px;
+              margin-bottom:3px">
+              <span style="font-size:15px;font-weight:500">
+                APP-${String(app.application_id).padStart(4,'0')}
+              </span>
+              ${statusBadge(app.application_status)}
+            </div>
+            <div style="font-size:12px;color:var(--muted)">
+              ยื่นเมื่อ ${formatDate(app.application_date)}
+            </div>
+          </div>
+          <!-- action buttons -->
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-sm"
+              onclick="openEditApplication(${app.application_id})">
+              <i class="ti ti-edit" aria-hidden="true"></i> Edit
+            </button>
+            <button class="btn btn-sm"
+              onclick="openAddDocument(${app.application_id},
+                '${app.applicant_type}')">
+              <i class="ti ti-upload" aria-hidden="true"></i> Add doc
+            </button>
+            <button class="btn btn-sm btn-danger"
+              onclick="openDeleteApplication(${app.application_id})">
+              <i class="ti ti-trash" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- loan info -->
+        <div class="card-body">
+          <span class="section-label">Loan request</span>
+          <div class="kv-grid">
+            <div class="kv">
+              <label>Requested amount</label>
+              <span style="font-weight:500">
+                ${formatBaht(app.requested_amount)}
+              </span>
+            </div>
+            <div class="kv">
+              <label>Tenure</label>
+              <span>${app.requested_tenure_months} months</span>
+            </div>
+            <div class="kv">
+              <label>Applicant type</label>
+              <span>${app.applicant_type ?? '—'}</span>
+            </div>
+            <div class="kv">
+              <label>Branch ID</label>
+              <span>${app.branch_id ?? '—'}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- customer details -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Customer details</span>
+        </div>
+        <div class="card-body">
+          <div class="kv-grid">
+            <div class="kv">
+              <label>ชื่อ</label>
+              <span>${app.customer?.customer_name ?? '—'}</span>
+            </div>
+            <div class="kv">
+              <label>Account no.</label>
+              <span>${app.customer?.customer_ac_no ?? '—'}</span>
+            </div>
+            <div class="kv">
+              <label>Birthday</label>
+              <span>${formatDate(app.customer?.customer_birthday)}</span>
+            </div>
+            <div class="kv">
+              <label>Address</label>
+              <span style="font-size:12px">
+                ${app.customer?.customer_address ?? '—'}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- progress -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Application progress</span>
+        </div>
+        <div class="card-body">${stepsHTML}</div>
+      </div>
+
+      <!-- documents -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Documents</span>
+          <span class="tag">${docs.length} ไฟล์</span>
+        </div>
+        <div class="card-body" style="padding-top:4px">
+          ${docsHTML}
+        </div>
+      </div>
+
+    </div>
+  `
+}
+
+// ── โหลด branch options ──────────────────────────────────────────
+async function loadBranchOptions() {
+  const branches = await query(d =>
+    d.from('branch').select('branch_id, branch_name')
+  ) ?? []
+  const opts = branches.map(b =>
+    `<option value="${b.branch_id}">${b.branch_name}</option>`
+  ).join('')
+  // ใส่ใน modal add และ modal edit
+  const addEl  = document.getElementById('app-branch-id')
+  const editEl = document.getElementById('edit-app-branch')
+  if (addEl)  addEl.innerHTML  = `<option value="">-- เลือกสาขา --</option>${opts}`
+  if (editEl) editEl.innerHTML = opts
+}
+
+// ── โหลด customer options ────────────────────────────────────────
+async function loadCustomerOptions() {
+  const custs = await query(d =>
+    d.from('customer').select('customer_id, customer_name')
+    .order('customer_name')
+  ) ?? []
+  const opts = custs.map(c =>
+    `<option value="${c.customer_id}">${c.customer_name}</option>`
+  ).join('')
+  const el = document.getElementById('app-customer-id')
+  if (el) el.innerHTML =
+    `<option value="">-- เลือกลูกค้า --</option>${opts}`
+}
+
+// ── lookup customer name จาก customer_id ที่พิมพ์ ──────────────
+// เรียกทุกครั้งที่ oninput เพื่อ validate และแสดงชื่อ
+async function lookupCustomer(val) {
+  const resultEl = document.getElementById('customer-lookup-result')
+  const id = Number(val)
+
+  // ยังไม่ได้พิมพ์หรือพิมพ์ไม่ครบ
+  if (!id || id <= 0) {
+    resultEl.textContent = '—'
+    resultEl.style.color = 'var(--muted)'
+    return
+  }
+
+  // query ชื่อลูกค้าจาก customer_id
+  const result = await query(d =>
+    d.from('customer')
+      .select('customer_id, customer_name')
+      .eq('customer_id', id)
+      .single())
+
+  if (result?.customer_name) {
+    // พบ — แสดงชื่อสีเขียว
+    resultEl.textContent = '✓ ' + result.customer_name
+    resultEl.style.color = 'var(--green)'
+  } else {
+    // ไม่พบ — แสดง error สีแดง
+    resultEl.textContent = '✗ ไม่พบลูกค้า'
+    resultEl.style.color = 'var(--red)'
+  }
+}
+
+// ── submit new application (INSERT) ─────────────────────────────
+async function submitNewApplication() {
+  const customer_id = Number(
+    document.getElementById('app-customer-id').value)
+
+  // ── validation: ตรวจว่า customer_id มีอยู่จริง ──────────────
+  if (!customer_id || customer_id <= 0)
+    return toast('กรุณาใส่ Customer ID', 'error')
+
+  // ตรวจสอบกับ database ก่อน submit
+  const customer = await query(d =>
+    d.from('customer')
+      .select('customer_id')
+      .eq('customer_id', customer_id)
+      .single())
+
+  if (!customer)
+    return toast('ไม่พบลูกค้า Customer ID นี้', 'error')
+
+  const applicant_type = document.querySelector(
+    'input[name="app-applicant-type"]:checked')?.value
+  const branch_id = Number(
+    document.getElementById('app-branch-id').value) || null
+  const requested_amount = Number(
+    document.getElementById('app-amount').value)
+  const requested_tenure_months = Number(
+    document.getElementById('app-tenure').value)
+  const application_date =
+    document.getElementById('app-date').value || null
+
+  // validation
+  if (!customer_id) return toast('กรุณาเลือกลูกค้า', 'error')
+  if (!requested_amount || requested_amount <= 0)
+    return toast('กรุณาใส่จำนวนเงิน', 'error')
+  if (!requested_tenure_months || requested_tenure_months <= 0)
+    return toast('กรุณาใส่จำนวนเดือน', 'error')
+
+  // INSERT — application_id จะถูก generate อัตโนมัติโดย SERIAL
+  const result = await query(d =>
+    d.from('loan_application').insert({
+      customer_id,
+      applicant_type,
+      branch_id,
+      requested_amount,
+      requested_tenure_months,
+      application_date: application_date || undefined,
+      application_status: 'Pending',
+      is_deleted: false,
+    }).select())
+
+  if (result) {
+    toast('สร้าง application เรียบร้อย', 'success')
+    closeModal('modal-app-add')
+    // reload หน้า applications
+    await pageLoaders['applications']()
+  } else {
+    toast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error')
+  }
+}
+
+// ── เปิด modal edit พร้อม prefill ข้อมูล ────────────────────────
+function openEditApplication(appId) {
+  const app = allApplications.find(a => a.application_id === appId)
+  if (!app) return
+
+  document.getElementById('edit-app-id').value    = appId
+  document.getElementById('edit-app-amount').value = app.requested_amount
+  document.getElementById('edit-app-tenure').value =
+    app.requested_tenure_months
+  document.getElementById('edit-app-branch').value = app.branch_id ?? ''
+  document.getElementById('edit-app-status').value =
+    app.application_status
+
+  openModal('modal-app-edit')
+}
+
+// ── submit edit application (UPDATE) ────────────────────────────
+async function submitEditApplication() {
+  const appId = Number(document.getElementById('edit-app-id').value)
+  const requested_amount = Number(
+    document.getElementById('edit-app-amount').value)
+  const requested_tenure_months = Number(
+    document.getElementById('edit-app-tenure').value)
+  const branch_id = Number(
+    document.getElementById('edit-app-branch').value) || null
+  const application_status =
+    document.getElementById('edit-app-status').value
+
+  if (!requested_amount || requested_amount <= 0)
+    return toast('กรุณาใส่จำนวนเงิน', 'error')
+
+  const result = await query(d =>
+    d.from('loan_application')
+      .update({ requested_amount, requested_tenure_months,
+                branch_id, application_status })
+      .eq('application_id', appId)
+      .select())
+
+  if (result) {
+    toast('แก้ไขข้อมูลเรียบร้อย', 'success')
+    closeModal('modal-app-edit')
+    await pageLoaders['applications']()
+    selectApplication(appId)
+  } else {
+    toast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error')
+  }
+}
+
+// ── เปิด modal add document ──────────────────────────────────────
+function openAddDocument(appId, applicantType) {
+  document.getElementById('doc-app-id').value       = appId
+  document.getElementById('doc-applicant-type').value = applicantType
+
+  // populate document type options ตาม applicant type
+  const salDocs = [
+    'Salary Slip',
+    'Bank Statement 1M',
+    'Bank Statement 6M',
+    'Income Certificate',
+  ]
+  const bizDocs = [
+    'Business Registration',
+    'Bank Statement 6M',
+    'Receipt',
+    'Contract',
+  ]
+  const opts = (applicantType === 'Salaried' ? salDocs : bizDocs)
+    .map(t => `<option value="${t}">${t}</option>`).join('')
+  document.getElementById('doc-type').innerHTML = opts
+
+  openModal('modal-doc-add')
+}
+
+// ── submit add document (INSERT + Storage upload) ────────────────
+async function submitAddDocument() {
+  const appId        = document.getElementById('doc-app-id').value
+  const applicantType= document.getElementById('doc-applicant-type').value
+  const docType      = document.getElementById('doc-type').value
+  const fileInput    = document.getElementById('doc-file')
+  const file         = fileInput?.files?.[0]
+
+  if (!file) return toast('กรุณาเลือกไฟล์', 'error')
+
+  // ตรวจ mime type
+  const allowed = ['application/pdf','image/jpeg','image/png']
+  if (!allowed.includes(file.type))
+    return toast('รองรับเฉพาะ PDF, JPG, PNG', 'error')
+
+  // สร้าง path ใน Storage: documents/app_{id}/{timestamp}_{filename}
+  const filePath =
+    `documents/app_${appId}/${Date.now()}_${file.name}`
+
+  // อัปโหลดไปยัง Supabase Storage bucket ชื่อ "documents"
+  const { error: uploadError } = await db.storage
+    .from('documents')
+    .upload(filePath, file, { contentType: file.type })
+
+  if (uploadError) {
+    console.error(uploadError)
+    return toast('อัปโหลดไฟล์ไม่สำเร็จ: ' + uploadError.message, 'error')
+  }
+
+  // INSERT row ใน document table
+  const result = await query(d =>
+    d.from('document').insert({
+      application_id:      Number(appId),
+      applicant_type:      applicantType,
+      document_type:       docType,
+      file_name:           file.name,
+      file_path:           filePath,
+      mime_type:           file.type,
+      verification_status: 'Pending',
+      is_deleted:          false,
+    }).select())
+
+  if (result) {
+    toast('อัปโหลดเอกสารเรียบร้อย', 'success')
+    closeModal('modal-doc-add')
+    fileInput.value = ''
+    selectApplication(Number(appId)) // refresh detail panel
+  } else {
+    toast('บันทึกข้อมูลไม่สำเร็จ', 'error')
+  }
+}
+
+// ── เปิด modal confirm delete ────────────────────────────────────
+function openDeleteApplication(appId) {
+  document.getElementById('delete-app-label').textContent =
+    `APP-${String(appId).padStart(4,'0')}`
+  // เก็บ appId ไว้ใน dataset ของปุ่ม confirm
+  document.querySelector('#modal-app-delete .btn-danger')
+    .dataset.appId = appId
+  openModal('modal-app-delete')
+}
+
+// ── confirm soft delete (UPDATE is_deleted = true) ───────────────
+async function confirmDeleteApplication() {
+  const appId = Number(
+    document.querySelector('#modal-app-delete .btn-danger').dataset.appId)
+
+  const result = await query(d =>
+    d.from('loan_application')
+      .update({
+        is_deleted: true,
+        deleted_at: new Date().toISOString()
+      })
+      .eq('application_id', appId))
+
+  if (result !== null) {
+    toast('ย้ายไป Trash เรียบร้อย', 'success')
+    closeModal('modal-app-delete')
+    selectedAppId = null
+    // รีเซ็ต detail panel
+    document.getElementById('app-detail-panel').innerHTML = `
+      <div class="card">
+        <div class="card-body">
+          <div class="empty">เลือก application เพื่อดูรายละเอียด</div>
+        </div>
+      </div>`
+    await pageLoaders['applications']()
+  } else {
+    toast('เกิดข้อผิดพลาด กรุณาลองใหม่', 'error')
+  }
+}
+
+// -- Customers --
+pageLoaders['customers'] = async function() {
+  document.getElementById('customers-content').innerHTML =
+    '<div class="loading">กำลังโหลด...</div>'
+}
+
+// -- Underwriting --
+pageLoaders['underwriting'] = async function() {
+  document.getElementById('underwriting-content').innerHTML =
+    '<div class="loading">กำลังโหลด...</div>'
+}
+
+// -- Loans --
+pageLoaders['loans'] = async function() {
+  document.getElementById('loans-content').innerHTML =
+    '<div class="loading">กำลังโหลด...</div>'
+}
+
+// -- Trash --
+pageLoaders['trash'] = async function() {
+  document.getElementById('trash-content').innerHTML =
+    '<div class="loading">กำลังโหลด...</div>'
+}
+
+// ================================================================
+// INIT — โหลดหน้าแรก
+// ================================================================
+showPage('dashboard')
+</script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+สมาชิก: สุทธิพจน์​ พรบุญบานเย็น
+Dataset ที่เลือก: ฐานข้อมูลส่วนตัวลูกค้า Online Banking
+
+[1] Web App นี้เป็นระบบจัดการข้อมูลลูกค้าธนาคาร สามารถแสดงรายชื่อลูกค้าทั้งหมดเรียงตาม Customer ID 
+และลงทะเบียนลูกค้าใหม่โดยระบบจะสร้าง Customer ID ให้อัตโนมัติต่อจาก ID ล่าสุดในระบบ นอกจากนี้ยังสามารถ
+ค้นหาลูกค้าด้วยชื่อ เบอร์โทรศัพท์ หรือ Customer ID และลบข้อมูลลูกค้าได้ครั้งละหลายรายการพร้อมกัน
+
+[2] HTTP Method ที่ใช้ในแต่ละ function: 
+- function ดึงข้อมูล (loadCustomers, searchCustomer, generateNextCustomerId) 
+→ ใช้ METHOD: GET เพราะ เพราะเป็นการขอดูข้อมูลจาก database โดยไม่มีการเปลี่ยนแปลงข้อมูลใดๆ 
+- function เพิ่มข้อมูล (addCustomer) → ใช้ METHOD: POST เพราะเป็นการส่งข้อมูลลูกค้าใหม่ไปสร้าง record ใน database
+- function ลบข้อมูล (deleteSelected) → ใช้ METHOD: DELETE เพราะเป็นการระบุ record ที่ต้องการลบออกจาก database
+
+[3] AI prompt ที่ใช้ (ถ้ามี) และวิธีที่นำผลลัพธ์ไปปรับใช้: 
+Prompt: I am desinging a online bank customer data management databse. Design a web app from the following database. 
+The web app should include 3 pages: 
+1. Customer data table -> load customer data and visulize as a table of customer data arranged in ascending order of customer_id 
+2. Add customer -> 
+3. Delete customer ->
+
+
+นำไปปรับโดย: 
+
+[4] ปัญหาที่พบระหว่างทำและแก้ยังไง: พบปัญหา DataCloneError เมื่อรันใน preview เนื่องจาก Supabase client ใช้ Headers object 
+ที่ clone ข้าม iframe context ไม่ได้, พบ error password_complexity_check เพราะ DB มี constraint ตรวจ plain text 
+แต่โค้ดส่ง SHA-256 hash ไป จึงแก้โดยเปลี่ยนกลับเป็น plain text ตามข้อมูลเดิมในระบบ และพบปัญหาฟังก์ชันค้นหาขึ้น 400 Bad Request 
+เพราะ Supabase JS client encode % ซ้ำเป็น %25 และ query อ้างถึง column id ที่ไม่มีในตาราง จึงแก้โดยเปลี่ยนมาใช้ raw fetch 
+แทน และเปลี่ยนทุกจุดให้ใช้ customer_id เป็น primary key
